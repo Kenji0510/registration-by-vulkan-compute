@@ -1,0 +1,27 @@
+[package]
+name = "registration_vulkan"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0"
+pcd-rs = { version = "0.11", features = ["derive"] }
+plotters = "0.3"
+
+ndarray = { version = "0.15", features = ["blas", "rayon"] }
+ndarray-linalg = { version = "0.15", features = ["openblas-system"] }
+nalgebra = "0.34.1"
+
+rayon = "1.11.0"
+rustc-hash = "2.1.1"
+
+kiddo = "5.0"
+
+vulkano = "0.35.0"
+vulkano-shaders = { version = "0.34.0", features = [
+    "shaderc-build-from-source",
+] }
+bytemuck = "1.25.0"
+
+log = "0.4.29"
+env_logger = "0.11.9"
