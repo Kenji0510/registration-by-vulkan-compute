@@ -3,10 +3,11 @@ use log::{debug, info};
 use registration_vulkan::{
     gpu_copy::copy_d_to_h,
     gpu_covariance::CovarianceGpuContext,
-    gpu_search_neighbor::{PtsInfo, SearchGpuContext},
+    gpu_knn_search::{KnnSearchConsts, KnnSearchGpuContext},
+    gpu_search_neighbor::{SearchGpuContext, SearchNeighborConsts},
     gpu_transform::{TransformGpuContext, TransformParams},
     gpu_voxel::VoxelGpuContext,
-    init_gpu::{GpuBuffer, VulkanContext},
+    init_gpu::VulkanContext,
     oprate_pcd::{convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, save_pcd_with_covs},
     transform_data::pcd_to_vecf32,
 };
@@ -33,6 +34,8 @@ fn main() -> Result<()> {
         .context("Failed to create GPU transform context for source")?;
     let mut gpu_neighbor_search_ctx = SearchGpuContext::new(vulkan_context.clone())
         .context("Failed to create GPU neighbor search context")?;
+    let mut gpu_knn_search_ctx = KnnSearchGpuContext::new(vulkan_context.clone())
+        .context("Failed to create GPU knn search context")?;
 
     // let gpu_buffer = GpuBuffer {
     //     voxel_d_buf_source_pts: None,
@@ -156,7 +159,7 @@ fn main() -> Result<()> {
     // <!--- DEBUG --->
 
     // <!--- Perform neighbor search using GPU --->
-    let search_params = PtsInfo {
+    let search_params = SearchNeighborConsts {
         num_source: gpu_transform_ctx_for_source.num_points as u32,
         num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
     };
@@ -175,6 +178,16 @@ fn main() -> Result<()> {
     // <!--- DEBUG --->
 
     // <!--- Perform neighbor search using GPU --->
+
+    // <!--- Perform knn neighbor search using GPU --->
+    let knn_search_params = KnnSearchConsts {
+        num_points: gpu_transform_ctx_for_source.num_points as u32,
+    };
+    gpu_knn_search_ctx
+        .knn_search_neighbors(&gpu_voxel_ctx_for_target, knn_search_params)
+        .context("Failed to perform knn neighbor search using GPU")?;
+
+    // <!--- Perform knn neighbor search using GPU --->
 
     Ok(())
 }

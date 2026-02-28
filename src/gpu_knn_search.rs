@@ -1,10 +1,13 @@
 use std::{sync::Arc, time::Instant};
 
+use foldhash::{HashMap, HashMapExt};
+
 use anyhow::{Context, Result};
 use log::debug;
+use vulkano::shader::SpecializationConstant;
 use vulkano::{
     buffer::{Buffer, BufferCreateInfo, BufferUsage, Subbuffer},
-    command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, CopyBufferInfo},
+    command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage},
     descriptor_set::{DescriptorSet, layout::DescriptorSetLayout},
     memory::allocator::{AllocationCreateInfo, MemoryTypeFilter},
     pipeline::{
@@ -15,26 +18,23 @@ use vulkano::{
     sync::{self, GpuFuture},
 };
 
-use crate::{
-    gpu_transform::TransformGpuContext, gpu_voxel::VoxelGpuContext, init_gpu::VulkanContext,
-};
+use crate::{gpu_voxel::VoxelGpuContext, init_gpu::VulkanContext};
+
+const K_NEIGHBORS: usize = 8;
 
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
 #[repr(C)]
-pub struct SearchNeighborConsts {
-    pub num_source: u32,
-    pub num_target: u32,
+pub struct KnnSearchConsts {
+    pub num_points: u32,
 }
 
-pub struct SearchGpuContext {
+pub struct KnnSearchGpuContext {
     vulkan_context: VulkanContext,
 
     compute_pipeline_search: Arc<ComputePipeline>,
     pipeline_layout_search: Arc<PipelineLayout>,
     descriptor_set_layout_search: Arc<DescriptorSetLayout>,
 
-    // d_buf_source_pts: Option<Subbuffer<[f32]>>,
-    // d_buf_target_pts: Option<Subbuffer<[f32]>>,
     pub d_buf_indices: Option<Subbuffer<[i32]>>,
     pub d_buf_dists_sq: Option<Subbuffer<[f32]>>,
 
@@ -44,19 +44,24 @@ pub struct SearchGpuContext {
     pub current_capacity_pts: usize,
 }
 
-impl SearchGpuContext {
+impl KnnSearchGpuContext {
     pub fn new(vulkan_context: VulkanContext) -> Result<Self> {
         mod cs_search {
             vulkano_shaders::shader! {
                 ty: "compute",
-                path: "src/kernels/search_neighbor/search.glsl",
+                path: "src/kernels/knn_search/knn_search.glsl",
             }
         }
 
         let shader_search = cs_search::load(vulkan_context.device.clone())
             .context("Failed to load search shader")?;
 
+        let mut spec = HashMap::new();
+        spec.insert(0u32, SpecializationConstant::U32(K_NEIGHBORS as u32));
+
         let cs_search = shader_search
+            .specialize(spec)
+            .context("Failed to specialize search shader with constants")?
             .entry_point("main")
             .context("Failed to find entry point in search shader")?;
 
@@ -89,8 +94,6 @@ impl SearchGpuContext {
             compute_pipeline_search: compute_pipeline_search.clone(),
             pipeline_layout_search: pipeline_layout_search.clone(),
             descriptor_set_layout_search: descriptor_set_layout_search.clone(),
-            // d_buf_source_pts: None,
-            // d_buf_target_pts: None,
             d_buf_indices: None,
             d_buf_dists_sq: None,
             staging_buf_indices: None,
@@ -99,12 +102,11 @@ impl SearchGpuContext {
         })
     }
 
-    pub fn search_neighbor(
+    pub fn knn_search_neighbors(
         &mut self,
-        source_transform_gpu_context: &TransformGpuContext,
         target_gpu_context: &VoxelGpuContext,
-        search_params: SearchNeighborConsts,
-    ) -> Result<(Vec<i32>, Vec<f32>)> {
+        knn_search_params: KnnSearchConsts,
+    ) -> Result<()> {
         let device = &self.vulkan_context.device;
         let queue = &self.vulkan_context.queue;
         let memory_allocator = &self.vulkan_context.memory_allocator;
@@ -113,67 +115,39 @@ impl SearchGpuContext {
         let pipeline_layout = &self.pipeline_layout_search;
         let compute_pipeline = &self.compute_pipeline_search;
 
-        if self.current_capacity_pts < source_transform_gpu_context.num_points {
+        if self.current_capacity_pts < target_gpu_context.h_downsampled_pts_num {
             debug!(
                 "Reallocating buffers for {} points",
-                source_transform_gpu_context.num_points
+                target_gpu_context.h_downsampled_pts_num
             );
 
-            let new_capacity = (source_transform_gpu_context.num_points as f32 * 1.5) as usize;
+            let new_capacity = (target_gpu_context.h_downsampled_pts_num as f32 * 1.5) as usize;
             self.current_capacity_pts = new_capacity;
 
             self.d_buf_indices = Some(Buffer::new_slice::<i32>(
                 memory_allocator.clone(),
                 BufferCreateInfo {
-                    usage: BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_SRC,
+                    usage: BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST,
                     ..Default::default()
                 },
                 AllocationCreateInfo {
                     memory_type_filter: MemoryTypeFilter::PREFER_DEVICE,
                     ..Default::default()
                 },
-                new_capacity as u64,
+                (new_capacity * K_NEIGHBORS) as u64,
             )?);
 
             self.d_buf_dists_sq = Some(Buffer::new_slice::<f32>(
                 memory_allocator.clone(),
                 BufferCreateInfo {
-                    usage: BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_SRC,
+                    usage: BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_DST,
                     ..Default::default()
                 },
                 AllocationCreateInfo {
                     memory_type_filter: MemoryTypeFilter::PREFER_DEVICE,
                     ..Default::default()
                 },
-                new_capacity as u64,
-            )?);
-
-            self.staging_buf_indices = Some(Buffer::new_slice::<i32>(
-                memory_allocator.clone(),
-                BufferCreateInfo {
-                    usage: BufferUsage::TRANSFER_DST,
-                    ..Default::default()
-                },
-                AllocationCreateInfo {
-                    memory_type_filter: MemoryTypeFilter::PREFER_HOST
-                        | MemoryTypeFilter::HOST_RANDOM_ACCESS,
-                    ..Default::default()
-                },
-                new_capacity as u64,
-            )?);
-
-            self.staging_buf_dists_sq = Some(Buffer::new_slice::<f32>(
-                memory_allocator.clone(),
-                BufferCreateInfo {
-                    usage: BufferUsage::TRANSFER_DST,
-                    ..Default::default()
-                },
-                AllocationCreateInfo {
-                    memory_type_filter: MemoryTypeFilter::PREFER_HOST
-                        | MemoryTypeFilter::HOST_RANDOM_ACCESS,
-                    ..Default::default()
-                },
-                new_capacity as u64,
+                (new_capacity * K_NEIGHBORS) as u64,
             )?);
         }
 
@@ -183,14 +157,6 @@ impl SearchGpuContext {
             [
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     0,
-                    source_transform_gpu_context
-                        .d_buf_output_pts
-                        .as_ref()
-                        .context("Failed to get output points buffer")?
-                        .clone(),
-                ),
-                vulkano::descriptor_set::WriteDescriptorSet::buffer(
-                    1,
                     target_gpu_context
                         .d_buf_out_pts
                         .as_ref()
@@ -198,14 +164,14 @@ impl SearchGpuContext {
                         .clone(),
                 ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
-                    2,
+                    1,
                     self.d_buf_indices
                         .as_ref()
                         .context("Failed to get indices buffer")?
                         .clone(),
                 ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
-                    3,
+                    2,
                     self.d_buf_dists_sq
                         .as_ref()
                         .context("Failed to get distances buffer")?
@@ -225,7 +191,7 @@ impl SearchGpuContext {
 
         const LOCAL_SIZE: u32 = 256;
         let group_count_x =
-            (source_transform_gpu_context.num_points as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
+            (target_gpu_context.h_downsampled_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
         let work_group_count = [group_count_x, 1, 1];
 
         // Check if timestamps are supported
@@ -253,7 +219,7 @@ impl SearchGpuContext {
             command_buffer_builder
                 .bind_pipeline_compute(compute_pipeline.clone())
                 .context("Failed to bind compute pipeline")?
-                .push_constants(pipeline_layout.clone(), 0, search_params)
+                .push_constants(pipeline_layout.clone(), 0, knn_search_params)
                 .context("Failed to push constants")?
                 .bind_descriptor_sets(
                     vulkano::pipeline::PipelineBindPoint::Compute,
@@ -266,50 +232,6 @@ impl SearchGpuContext {
                 .context("Failed to dispatch compute shader")?;
         }
 
-        // <!--- Copy source neighbor indices from GPU to staging buffer --->
-        let copy_output_indices_src = self
-            .d_buf_indices
-            .as_ref()
-            .context("Failed to get output indices buffer for copy")?
-            .clone()
-            .slice(0..search_params.num_source as u64);
-        let copy_output_indices_dst = self
-            .staging_buf_indices
-            .as_ref()
-            .context("Failed to get staging buffer for indices copy")?
-            .clone()
-            .slice(0..search_params.num_source as u64);
-
-        command_buffer_builder
-            .copy_buffer(CopyBufferInfo::buffers(
-                copy_output_indices_src,
-                copy_output_indices_dst,
-            ))
-            .context("Failed to copy output indices to staging buffer")?;
-        // <!--- Copy source neighbor indices from GPU to staging buffer --->
-
-        // <!--- Copy source neighbor distances from GPU to staging buffer --->
-        let copy_output_distances_src = self
-            .d_buf_dists_sq
-            .as_ref()
-            .context("Failed to get output distances buffer for copy")?
-            .clone()
-            .slice(0..search_params.num_source as u64);
-        let copy_output_distances_dst = self
-            .staging_buf_dists_sq
-            .as_ref()
-            .context("Failed to get staging buffer for distances copy")?
-            .clone()
-            .slice(0..search_params.num_source as u64);
-
-        command_buffer_builder
-            .copy_buffer(CopyBufferInfo::buffers(
-                copy_output_distances_src,
-                copy_output_distances_dst,
-            ))
-            .context("Failed to copy output distances to staging buffer")?;
-        // <!--- Copy source neighbor distances from GPU to staging buffer --->
-
         let command_buffer = command_buffer_builder.build()?;
 
         let compute_start_time = Instant::now();
@@ -321,34 +243,10 @@ impl SearchGpuContext {
 
         let compute_end_time = compute_start_time.elapsed();
         debug!(
-            "Compute neighbor search shader execution time: {:?}",
+            "Compute knn search shader execution time: {:?}",
             compute_end_time
         );
 
-        // <!--- Copy results from staging buffer to CPU --->
-        let indices_content = self
-            .staging_buf_indices
-            .as_ref()
-            .context("Failed to get staging buffer for indices read")?
-            .read()?;
-        let output_indices: Vec<i32> = indices_content
-            .iter()
-            .take(search_params.num_source as usize)
-            .copied()
-            .collect();
-
-        let distances_content = self
-            .staging_buf_dists_sq
-            .as_ref()
-            .context("Failed to get staging buffer for distances read")?
-            .read()?;
-        let output_distances: Vec<f32> = distances_content
-            .iter()
-            .take(search_params.num_source as usize)
-            .copied()
-            .collect();
-        // <!--- Copy results from staging buffer to CPU --->
-
-        Ok((output_indices, output_distances))
+        Ok(())
     }
 }

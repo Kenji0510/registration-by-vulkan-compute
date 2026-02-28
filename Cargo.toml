@@ -22,6 +22,7 @@ vulkano-shaders = { version = "0.34.0", features = [
     "shaderc-build-from-source",
 ] }
 bytemuck = "1.25.0"
+foldhash = "0.1"
 
 log = "0.4.29"
 env_logger = "0.11.9"
