@@ -3,6 +3,7 @@ use log::{debug, info};
 use registration_vulkan::{
     gpu_copy::copy_d_to_h,
     gpu_covariance::CovarianceGpuContext,
+    gpu_search_neighbor::{PtsInfo, SearchGpuContext},
     gpu_transform::{TransformGpuContext, TransformParams},
     gpu_voxel::VoxelGpuContext,
     init_gpu::{GpuBuffer, VulkanContext},
@@ -10,7 +11,8 @@ use registration_vulkan::{
     transform_data::pcd_to_vecf32,
 };
 
-const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd";
+// const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd";
+const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
 const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
 
 const VOXEL_SIZE: f32 = 0.25;
@@ -29,8 +31,8 @@ fn main() -> Result<()> {
         .context("Failed to create GPU covariance context for target")?;
     let mut gpu_transform_ctx_for_source = TransformGpuContext::new(vulkan_context.clone())
         .context("Failed to create GPU transform context for source")?;
-    let mut gpu_transform_ctx_for_target = TransformGpuContext::new(vulkan_context.clone())
-        .context("Failed to create GPU transform context for target")?;
+    let mut gpu_neighbor_search_ctx = SearchGpuContext::new(vulkan_context.clone())
+        .context("Failed to create GPU neighbor search context")?;
 
     // let gpu_buffer = GpuBuffer {
     //     voxel_d_buf_source_pts: None,
@@ -93,12 +95,27 @@ fn main() -> Result<()> {
 
     // <!--- Compute the transformation of the point clouds using GPU voxelization --->
     // Z軸基準で180度回転
+    // let transform_params_source = TransformParams {
+    //     r00: -1.0,
+    //     r01: 0.0,
+    //     r02: 0.0,
+    //     r10: 0.0,
+    //     r11: -1.0,
+    //     r12: 0.0,
+    //     r20: 0.0,
+    //     r21: 0.0,
+    //     r22: 1.0,
+    //     t0: 0.0,
+    //     t1: 0.0,
+    //     t2: 0.0,
+    //     num_points: downsampled_source_pts.len() as u32,
+    // };
     let transform_params_source = TransformParams {
-        r00: -1.0,
+        r00: 1.0,
         r01: 0.0,
         r02: 0.0,
         r10: 0.0,
-        r11: -1.0,
+        r11: 1.0,
         r12: 0.0,
         r20: 0.0,
         r21: 0.0,
@@ -137,6 +154,27 @@ fn main() -> Result<()> {
     save_pcd_with_covs(&downsampled_source_pts_with_covs, debug_save_path)
         .context("Failed to save downsampled source points with covariances")?;
     // <!--- DEBUG --->
+
+    // <!--- Perform neighbor search using GPU --->
+    let search_params = PtsInfo {
+        num_source: gpu_transform_ctx_for_source.num_points as u32,
+        num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
+    };
+
+    let (neighbor_indices, neighbor_distances) = gpu_neighbor_search_ctx
+        .search_neighbor(
+            &gpu_transform_ctx_for_source,
+            &gpu_voxel_ctx_for_target,
+            search_params,
+        )
+        .context("Failed to perform neighbor search using GPU")?;
+
+    // <!--- DEBUG --->
+    // println!("Neighbor indices: {:?}", neighbor_indices);
+    // println!("Neighbor distances: {:?}", neighbor_distances);
+    // <!--- DEBUG --->
+
+    // <!--- Perform neighbor search using GPU --->
 
     Ok(())
 }

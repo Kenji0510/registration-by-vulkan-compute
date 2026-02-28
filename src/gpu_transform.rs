@@ -53,7 +53,7 @@ pub struct TransformGpuContext {
     pub staging_buf_output_covs: Option<Subbuffer<[f32]>>,
     pub current_capacity_pts: usize,
 
-    pub num_points: i32,
+    pub num_points: usize,
     pub table_size: i32,
     pub voxel_size: f32,
 }
@@ -336,6 +336,10 @@ impl TransformGpuContext {
             "Compute transform shader execution time: {:?}",
             compute_end_time
         );
+
+        self.num_points = voxel_gpu_context.h_downsampled_pts_num;
+        self.table_size = voxel_gpu_context.table_size;
+        self.voxel_size = voxel_gpu_context.voxel_size;
 
         // <!--- DEBUG --->
         // let out_pts_content = self
