@@ -4,11 +4,12 @@ use registration_vulkan::{
     gpu_copy::copy_d_to_h,
     gpu_covariance::CovarianceGpuContext,
     gpu_knn_search::{KnnSearchConsts, KnnSearchGpuContext},
+    gpu_normals::{NormalParams, NormalsGpuContext, combine_pts_with_normals},
     gpu_search_neighbor::{SearchGpuContext, SearchNeighborConsts},
     gpu_transform::{TransformGpuContext, TransformParams},
     gpu_voxel::VoxelGpuContext,
     init_gpu::VulkanContext,
-    oprate_pcd::{convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, save_pcd_with_covs},
+    oprate_pcd::{convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, save_pcd, save_pcd_with_covs},
     transform_data::pcd_to_vecf32,
 };
 
@@ -36,6 +37,8 @@ fn main() -> Result<()> {
         .context("Failed to create GPU neighbor search context")?;
     let mut gpu_knn_search_ctx = KnnSearchGpuContext::new(vulkan_context.clone())
         .context("Failed to create GPU knn search context")?;
+    let mut gpu_normals_ctx_for_target = NormalsGpuContext::new(vulkan_context.clone())
+        .context("Failed to create GPU normals context for target")?;
 
     // let gpu_buffer = GpuBuffer {
     //     voxel_d_buf_source_pts: None,
@@ -188,6 +191,30 @@ fn main() -> Result<()> {
         .context("Failed to perform knn neighbor search using GPU")?;
 
     // <!--- Perform knn neighbor search using GPU --->
+
+    // <!--- Compute normals using GPU --->
+    let normal_params = NormalParams {
+        num_points: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
+        vp_x: 0.0,
+        vp_y: 0.0,
+        vp_z: 0.0,
+    };
+    let target_normals = gpu_normals_ctx_for_target
+        .compute_normals(
+            &gpu_voxel_ctx_for_target,
+            &gpu_knn_search_ctx,
+            normal_params,
+        )
+        .context("Failed to compute normals using GPU")?;
+
+    // <!--- DEBUG --->
+    let target_pts_with_normals =
+        combine_pts_with_normals(&downsampled_target_pts, &target_normals)?;
+    let debug_save_path_normals = "data/output/debug/target_normals.pcd";
+    save_pcd(&target_pts_with_normals, debug_save_path_normals)
+        .context("Failed to save target points with normals")?;
+    // <!--- DEBUG --->
+    // <!--- Compute normals using GPU --->
 
     Ok(())
 }
