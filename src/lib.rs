@@ -1,5 +1,6 @@
 pub mod gpu_copy;
 pub mod gpu_covariance;
+pub mod gpu_icp;
 pub mod gpu_knn_search;
 pub mod gpu_normals;
 pub mod gpu_search_neighbor;

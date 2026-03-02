@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
+use foldhash::{HashMap, HashMapExt};
 use log::debug;
 use std::{sync::Arc, time::Instant};
-use foldhash::{HashMap, HashMapExt};
 
 use vulkano::{
     buffer::{Buffer, BufferCreateInfo, BufferUsage, Subbuffer},

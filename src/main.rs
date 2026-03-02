@@ -1,8 +1,13 @@
+use core::f32;
+
 use anyhow::{Context, Result};
 use log::{debug, info};
+use ndarray::{Array1, Array2};
+use ndarray_linalg::Solve;
 use registration_vulkan::{
     gpu_copy::copy_d_to_h,
     gpu_covariance::CovarianceGpuContext,
+    gpu_icp::{IcpGpuContext, IcpParams},
     gpu_knn_search::{KnnSearchConsts, KnnSearchGpuContext},
     gpu_normals::{NormalParams, NormalsGpuContext, combine_pts_with_normals},
     gpu_search_neighbor::{SearchGpuContext, SearchNeighborConsts},
@@ -18,6 +23,7 @@ const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
 const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
 
 const VOXEL_SIZE: f32 = 0.25;
+const TOLERANCE: f32 = VOXEL_SIZE * VOXEL_SIZE;
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
@@ -39,6 +45,8 @@ fn main() -> Result<()> {
         .context("Failed to create GPU knn search context")?;
     let mut gpu_normals_ctx_for_target = NormalsGpuContext::new(vulkan_context.clone())
         .context("Failed to create GPU normals context for target")?;
+    let mut gpu_icp_ctx =
+        IcpGpuContext::new(vulkan_context.clone()).context("Failed to create GPU ICP context")?;
 
     // let gpu_buffer = GpuBuffer {
     //     voxel_d_buf_source_pts: None,
@@ -216,5 +224,155 @@ fn main() -> Result<()> {
     // <!--- DEBUG --->
     // <!--- Compute normals using GPU --->
 
+    // <!--- Compute ICP using GPU --->
+    let icp_params = IcpParams {
+        num_source: gpu_transform_ctx_for_source.num_points as i32,
+        num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as i32,
+        max_dist_sq: TOLERANCE,
+    };
+    let (h_H, h_b) = gpu_icp_ctx
+        .compute_icp(
+            &gpu_transform_ctx_for_source,
+            icp_params.num_source as usize,
+            &gpu_voxel_ctx_for_target,
+            icp_params.num_target as usize,
+            &gpu_normals_ctx_for_target,
+            &gpu_neighbor_search_ctx,
+            icp_params.max_dist_sq,
+        )
+        .context("Failed to compute ICP using GPU")?;
+    // <!--- DEBUG --->
+    println!("H (6x6 matrix):");
+    for i in 0..6 {
+        println!("{:.6} {:.6} {:.6} {:.6} {:.6} {:.6}", h_H[i * 6], h_H[i * 6 + 1], h_H[i * 6 + 2], h_H[i * 6 + 3], h_H[i * 6 + 4], h_H[i * 6 + 5]);
+    }
+    println!("b (6x1 vector):");
+    for i in 0..6 {
+        println!("{:.6}", h_b[i]);
+    }
+    // <!--- DEBUG --->
+
+    let h_matrix = Array2::from_shape_vec((6, 6), h_H.iter().map(|&v| v as f64).collect())?;
+    let b_vector = Array1::from_shape_vec(6, h_b.iter().map(|&v| v as f64).collect())?;
+    let delta_matrix = solve_linear_system_6x6(h_matrix, b_vector)?;
+
+    println!("Delta transformation matrix:");
+    for i in 0..4 {
+        println!("{:.6} {:.6} {:.6} {:.6}", delta_matrix[[i, 0]], delta_matrix[[i, 1]], delta_matrix[[i, 2]], delta_matrix[[i, 3]]);
+    }
+
+    // Check convergence (RMSE)
+    let mut sum = 0.0f32;
+    let mut cnt = 0usize;
+    let mut rmse = 0.0f32;
+
+    for j in 0..transform_params_source.num_points as usize {
+        let idx = neighbor_indices[j];
+        if idx < 0 {
+            continue;
+        }
+        if neighbor_distances[j] > TOLERANCE {
+            continue;
+        }
+        sum += neighbor_distances[j];
+        cnt += 1;
+    }
+    rmse = (sum / cnt as f32).sqrt();
+    debug!("RMSE: {}, count of valid correspondences: {}", rmse, cnt);
+    // <!--- Compute ICP using GPU --->
+
     Ok(())
+}
+
+fn solve_linear_system_6x6(a: Array2<f64>, b: Array1<f64>) -> Result<Array2<f32>> {
+    let x = a
+        .solve(&b)
+        .or_else(|_| Err(anyhow::anyhow!("Linear solve failed")))?;
+
+    // x = [alpha, beta, gamma, tx, ty, tz]
+    let delta_matrix = convert_se3_to_matrix4(x);
+    Ok(delta_matrix)
+}
+
+// [alpha, beta, gamma, tx, ty, tz] -> 4x4 matrix
+fn convert_se3_to_matrix4(x: Array1<f64>) -> Array2<f32> {
+    let alpha = x[0];
+    let beta = x[1];
+    let gamma = x[2];
+    let tx = x[3];
+    let ty = x[4];
+    let tz = x[5];
+
+    let theta = (alpha * alpha + beta * beta + gamma * gamma).sqrt();
+    let r: Array2<f64>;
+
+    if theta < 1e-9 {
+        r = ndarray::array![
+            [1.0, -gamma, beta],
+            [gamma, 1.0, -alpha],
+            [-beta, alpha, 1.0]
+        ];
+    } else {
+        let k_x = alpha / theta;
+        let k_y = beta / theta;
+        let k_z = gamma / theta;
+        let c = theta.cos();
+        let s = theta.sin();
+        let v = 1.0 - c;
+
+        r = ndarray::array![
+            [
+                k_x * k_x * v + c,
+                k_x * k_y * v - k_z * s,
+                k_x * k_z * v + k_y * s
+            ],
+            [
+                k_x * k_y * v + k_z * s,
+                k_y * k_y * v + c,
+                k_y * k_z * v - k_x * s
+            ],
+            [
+                k_x * k_z * v - k_y * s,
+                k_y * k_z * v + k_x * s,
+                k_z * k_z * v + c
+            ]
+        ];
+    }
+
+    ndarray::array![
+        [
+            r[[0, 0]] as f32,
+            r[[0, 1]] as f32,
+            r[[0, 2]] as f32,
+            tx as f32
+        ],
+        [
+            r[[1, 0]] as f32,
+            r[[1, 1]] as f32,
+            r[[1, 2]] as f32,
+            ty as f32
+        ],
+        [
+            r[[2, 0]] as f32,
+            r[[2, 1]] as f32,
+            r[[2, 2]] as f32,
+            tz as f32
+        ],
+        [0.0, 0.0, 0.0, 1.0]
+    ]
+}
+
+fn mat4_mul(a: &Array2<f32>, b: &Array2<f32>) -> Array2<f32> {
+    // a(4x4) * b(4x4)
+    let mut out = Array2::<f32>::zeros((4, 4));
+    for i in 0..4 {
+        for j in 0..4 {
+            let mut s = 0.0f32;
+            for k in 0..4 {
+                s += a[[i, k]] * b[[k, j]];
+            }
+            out[[i, j]] = s;
+        }
+    }
+    out
 }
