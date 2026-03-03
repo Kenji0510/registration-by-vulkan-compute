@@ -16,10 +16,13 @@ use vulkano::{
     sync::{self, GpuFuture},
 };
 
-use crate::{
-    gpu_normals::NormalsGpuContext, gpu_search_neighbor::SearchGpuContext,
-    gpu_transform::TransformGpuContext, gpu_voxel::VoxelGpuContext, init_gpu::VulkanContext,
-};
+use crate::{gpu_search_neighbor::SearchGpuContext, init_gpu::VulkanContext};
+
+pub struct IcpStaticBuffers {
+    pub d_source_pts: Subbuffer<[f32]>,
+    pub d_target_pts: Subbuffer<[f32]>,
+    pub d_target_normals: Subbuffer<[f32]>,
+}
 
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
 #[repr(C)]
@@ -100,12 +103,10 @@ impl IcpGpuContext {
 
     pub fn compute_icp(
         &mut self,
-        transform_gpu_context_source: &TransformGpuContext,
+        static_bufs: &IcpStaticBuffers,
+        neighbor_search_ctx: &SearchGpuContext,
         source_pts_num: usize,
-        voxel_gpu_context_target: &VoxelGpuContext,
         target_pts_num: usize,
-        normals_gpu_context_target: &NormalsGpuContext,
-        neighbor_search_gpu_context_source: &SearchGpuContext,
         max_dist_sq: f32,
     ) -> Result<(Vec<f32>, Vec<f32>)> {
         let device = &self.vulkan_context.device;
@@ -192,42 +193,30 @@ impl IcpGpuContext {
             [
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     0,
-                    transform_gpu_context_source
-                        .d_buf_output_pts
-                        .as_ref()
-                        .context("Failed to get source output points buffer")?
-                        .clone(),
+                    static_bufs.d_source_pts.clone(),
                 ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     1,
-                    voxel_gpu_context_target
-                        .d_buf_out_pts
-                        .as_ref()
-                        .context("Failed to get target output points buffer")?
-                        .clone(),
+                    static_bufs.d_target_pts.clone(),
                 ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     2,
-                    normals_gpu_context_target
-                        .d_buf_normals
-                        .as_ref()
-                        .context("Failed to get target normals buffer")?
-                        .clone(),
+                    static_bufs.d_target_normals.clone(),
                 ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     3,
-                    neighbor_search_gpu_context_source
+                    neighbor_search_ctx
                         .d_buf_indices
                         .as_ref()
-                        .context("Failed to get indices buffer")?
+                        .context("Failed to get neighbor indices buffer")?
                         .clone(),
                 ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     4,
-                    neighbor_search_gpu_context_source
+                    neighbor_search_ctx
                         .d_buf_dists_sq
                         .as_ref()
-                        .context("Failed to get distances buffer")?
+                        .context("Failed to get neighbor dists buffer")?
                         .clone(),
                 ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(

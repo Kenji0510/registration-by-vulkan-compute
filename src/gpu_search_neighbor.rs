@@ -21,7 +21,7 @@ use crate::{
 
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
 #[repr(C)]
-pub struct SearchNeighborConsts {
+pub struct SearchNeighborParams {
     pub num_source: u32,
     pub num_target: u32,
 }
@@ -102,8 +102,9 @@ impl SearchGpuContext {
     pub fn search_neighbor(
         &mut self,
         source_transform_gpu_context: &TransformGpuContext,
-        target_gpu_context: &VoxelGpuContext,
-        search_params: SearchNeighborConsts,
+        downsampled_source_pts_num: usize,
+        downsample_target_gpu_context: &VoxelGpuContext,
+        downsampled_target_pts_num: usize,
     ) -> Result<(Vec<i32>, Vec<f32>)> {
         let device = &self.vulkan_context.device;
         let queue = &self.vulkan_context.queue;
@@ -113,13 +114,18 @@ impl SearchGpuContext {
         let pipeline_layout = &self.pipeline_layout_search;
         let compute_pipeline = &self.compute_pipeline_search;
 
-        if self.current_capacity_pts < source_transform_gpu_context.num_points {
+        let search_params = SearchNeighborParams {
+            num_source: downsampled_source_pts_num as u32,
+            num_target: downsampled_target_pts_num as u32,
+        };
+
+        if self.current_capacity_pts < downsampled_source_pts_num {
             debug!(
                 "Reallocating buffers for {} points",
-                source_transform_gpu_context.num_points
+                downsampled_source_pts_num
             );
 
-            let new_capacity = (source_transform_gpu_context.num_points as f32 * 1.5) as usize;
+            let new_capacity = (downsampled_source_pts_num as f32 * 1.5) as usize;
             self.current_capacity_pts = new_capacity;
 
             self.d_buf_indices = Some(Buffer::new_slice::<i32>(
@@ -191,7 +197,7 @@ impl SearchGpuContext {
                 ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     1,
-                    target_gpu_context
+                    downsample_target_gpu_context
                         .d_buf_out_pts
                         .as_ref()
                         .context("Failed to get output points buffer")?
@@ -224,8 +230,7 @@ impl SearchGpuContext {
         .context("Failed to create command buffer builder")?;
 
         const LOCAL_SIZE: u32 = 256;
-        let group_count_x =
-            (source_transform_gpu_context.num_points as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
+        let group_count_x = (downsampled_source_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
         let work_group_count = [group_count_x, 1, 1];
 
         // Check if timestamps are supported

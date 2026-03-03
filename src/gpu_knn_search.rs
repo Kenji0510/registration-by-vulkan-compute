@@ -104,8 +104,8 @@ impl KnnSearchGpuContext {
 
     pub fn knn_search_neighbors(
         &mut self,
-        target_gpu_context: &VoxelGpuContext,
-        knn_search_params: KnnSearchConsts,
+        target_voxel_gpu_context: &VoxelGpuContext,
+        target_pts_num: usize,
     ) -> Result<()> {
         let device = &self.vulkan_context.device;
         let queue = &self.vulkan_context.queue;
@@ -115,13 +115,14 @@ impl KnnSearchGpuContext {
         let pipeline_layout = &self.pipeline_layout_search;
         let compute_pipeline = &self.compute_pipeline_search;
 
-        if self.current_capacity_pts < target_gpu_context.h_downsampled_pts_num {
-            debug!(
-                "Reallocating buffers for {} points",
-                target_gpu_context.h_downsampled_pts_num
-            );
+        let knn_search_params = KnnSearchConsts {
+            num_points: target_pts_num as u32,
+        };
 
-            let new_capacity = (target_gpu_context.h_downsampled_pts_num as f32 * 1.5) as usize;
+        if self.current_capacity_pts < target_pts_num {
+            debug!("Reallocating buffers for {} points", target_pts_num);
+
+            let new_capacity = (target_pts_num as f32 * 1.5) as usize;
             self.current_capacity_pts = new_capacity;
 
             self.d_buf_indices = Some(Buffer::new_slice::<i32>(
@@ -157,7 +158,7 @@ impl KnnSearchGpuContext {
             [
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     0,
-                    target_gpu_context
+                    target_voxel_gpu_context
                         .d_buf_out_pts
                         .as_ref()
                         .context("Failed to get output points buffer")?
@@ -190,8 +191,7 @@ impl KnnSearchGpuContext {
         .context("Failed to create command buffer builder")?;
 
         const LOCAL_SIZE: u32 = 256;
-        let group_count_x =
-            (target_gpu_context.h_downsampled_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
+        let group_count_x = (target_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
         let work_group_count = [group_count_x, 1, 1];
 
         // Check if timestamps are supported

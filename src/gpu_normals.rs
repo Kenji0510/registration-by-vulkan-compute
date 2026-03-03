@@ -105,7 +105,8 @@ impl NormalsGpuContext {
 
     pub fn compute_normals(
         &mut self,
-        voxel_gpu_context: &VoxelGpuContext,
+        target_voxel_gpu_context: &VoxelGpuContext,
+        target_pts_num: usize,
         knn_search_gpu_context: &KnnSearchGpuContext,
         normals_params: NormalParams,
     ) -> Result<Vec<[f32; 3]>> {
@@ -117,13 +118,10 @@ impl NormalsGpuContext {
         let pipeline_layout = &self.pipeline_layout_search;
         let compute_pipeline = &self.compute_pipeline_search;
 
-        if self.current_capacity_pts < voxel_gpu_context.h_downsampled_pts_num {
-            debug!(
-                "Reallocating buffers for {} points",
-                voxel_gpu_context.h_downsampled_pts_num
-            );
+        if self.current_capacity_pts < target_pts_num {
+            debug!("Reallocating buffers for {} points", target_pts_num);
 
-            let new_capacity = (voxel_gpu_context.h_downsampled_pts_num as f32 * 1.5) as usize;
+            let new_capacity = (target_pts_num as f32 * 1.5) as usize;
             self.current_capacity_pts = new_capacity;
 
             self.d_buf_normals = Some(Buffer::new_slice::<f32>(
@@ -160,7 +158,7 @@ impl NormalsGpuContext {
             [
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     0,
-                    voxel_gpu_context
+                    target_voxel_gpu_context
                         .d_buf_out_pts
                         .as_ref()
                         .context("Failed to get output points buffer")?
@@ -194,8 +192,7 @@ impl NormalsGpuContext {
         .context("Failed to create command buffer builder")?;
 
         const LOCAL_SIZE: u32 = 256;
-        let group_count_x =
-            (voxel_gpu_context.h_downsampled_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
+        let group_count_x = (target_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
         let work_group_count = [group_count_x, 1, 1];
 
         // Check if timestamps are supported
@@ -242,13 +239,13 @@ impl NormalsGpuContext {
             .as_ref()
             .context("Failed to get output normals buffer for copy")?
             .clone()
-            .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 3) as u64);
+            .slice(0..(target_pts_num * 3) as u64);
         let copy_output_normals_dst = self
             .staging_buf_normals
             .as_ref()
             .context("Failed to get staging buffer for normals copy")?
             .clone()
-            .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 3) as u64);
+            .slice(0..(target_pts_num * 3) as u64);
         command_buffer_builder
             .copy_buffer(CopyBufferInfo::buffers(
                 copy_output_normals_src,
@@ -280,7 +277,7 @@ impl NormalsGpuContext {
             .read()?;
         let output_normals: Vec<[f32; 3]> = normals_content
             .chunks_exact(3)
-            .take(voxel_gpu_context.h_downsampled_pts_num as usize)
+            .take(target_pts_num as usize)
             .map(|c| [c[0], c[1], c[2]])
             .collect();
         // <!--- Copy results from staging buffer to CPU --->

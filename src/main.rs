@@ -8,15 +8,16 @@ use ndarray_linalg::Solve;
 use registration_vulkan::{
     gpu_copy::copy_d_to_h,
     gpu_covariance::CovarianceGpuContext,
-    gpu_icp::{IcpGpuContext, IcpParams},
+    gpu_icp::{IcpGpuContext, IcpStaticBuffers},
     gpu_knn_search::{KnnSearchConsts, KnnSearchGpuContext},
     gpu_normals::{NormalParams, NormalsGpuContext, combine_pts_with_normals},
-    gpu_search_neighbor::{SearchGpuContext, SearchNeighborConsts},
+    gpu_search_neighbor::{SearchGpuContext, SearchNeighborParams},
     gpu_transform::{TransformGpuContext, TransformParams},
     gpu_voxel::VoxelGpuContext,
     init_gpu::VulkanContext,
     oprate_pcd::{
-        PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, save_pcd, save_pcd_with_covs, save_xyz_pcd
+        PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz,
+        save_pcd, save_pcd_with_covs, save_xyz_pcd,
     },
     transform_data::pcd_to_vecf32,
 };
@@ -54,16 +55,7 @@ fn main() -> Result<()> {
     let mut gpu_icp_ctx =
         IcpGpuContext::new(vulkan_context.clone()).context("Failed to create GPU ICP context")?;
 
-    // let gpu_buffer = GpuBuffer {
-    //     voxel_d_buf_source_pts: None,
-    //     voxel_d_buf_source_pts_num: 0,
-    //     voxel_d_buf_source_covs: None,
-    //     voxel_d_buf_target_pts: None,
-    //     voxel_d_buf_target_pts_num: 0,
-    //     voxel_d_buf_target_covs: None,
-    // };
-
-    let source_pcd = load_pcd_xyz(SOURCE_PCD_PATH).context("Failed to load the source pcd")?;
+    let source_pcd = load_pcd_xyz(SOURCE_PCD_PATH).context("Failed to load the source pcd")?;;
     let target_pcd = load_pcd_xyz(TARGET_PCD_PATH).context("Failed to load the target pcd")?;
 
     info!("=== Parameters ===");
@@ -78,22 +70,24 @@ fn main() -> Result<()> {
     info!("Points num of target: {}", target_pts_vec.len());
 
     // <!--- Downsample the point clouds using GPU voxelization --->
-    let mut downsampled_source_pts = gpu_voxel_ctx_for_source
+    let downsampled_source_pts = gpu_voxel_ctx_for_source
         .voxelization(&source_pts_vec, source_pts_vec.len(), VOXEL_SIZE)
         .context("Failed to compute voxelization for source")?;
-    let mut downsampled_target_pts = gpu_voxel_ctx_for_target
+    let downsampled_source_pts_num = downsampled_source_pts.len();
+    let downsampled_target_pts = gpu_voxel_ctx_for_target
         .voxelization(&target_pts_vec, target_pts_vec.len(), VOXEL_SIZE)
         .context("Failed to compute voxelization for target")?;
+    let downsampled_target_pts_num = downsampled_target_pts.len();
+
     debug!(
         "Downsampled points num of source: {}",
-        downsampled_source_pts.len()
+        downsampled_source_pts_num
     );
     debug!(
         "Downsampled points num of target: {}",
-        downsampled_target_pts.len()
+        downsampled_target_pts_num
     );
     // <!--- Downsample the point clouds using GPU voxelization --->
-
 
     // <!--- Calculate the centroids of the downsampled point clouds and translate them to the origin --->
     let downsampled_source_arr = convert_vecf32_to_arr2_f32(&downsampled_source_pts);
@@ -104,13 +98,12 @@ fn main() -> Result<()> {
     debug!("Source centroid translation:\n{}", initial_transform);
     // <!--- Calculate the centroids of the downsampled point clouds and translate them to the origin --->
 
-
     // <!--- Compute the covariance of the point clouds using GPU voxelization --->
     let d_source_covs = gpu_covariance_ctx_for_source
         .compute_covariances(
             &gpu_voxel_ctx_for_source,
             &downsampled_source_pts,
-            downsampled_source_pts.len(),
+            downsampled_source_pts_num,
             false,
         )
         .context("Failed to compute covariances for source")?;
@@ -118,7 +111,7 @@ fn main() -> Result<()> {
         .compute_covariances(
             &gpu_voxel_ctx_for_target,
             &downsampled_target_pts,
-            downsampled_target_pts.len(),
+            downsampled_target_pts_num,
             false,
         )
         .context("Failed to compute covariances for target")?;
@@ -187,18 +180,14 @@ fn main() -> Result<()> {
     // <!--- DEBUG --->
 
     // <!--- Perform knn neighbor search using GPU --->
-    let knn_search_params = KnnSearchConsts {
-        num_points: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
-    };
-
     gpu_knn_search_ctx
-        .knn_search_neighbors(&gpu_voxel_ctx_for_target, knn_search_params)
+        .knn_search_neighbors(&gpu_voxel_ctx_for_target, downsampled_target_pts_num)
         .context("Failed to perform knn neighbor search using GPU")?;
     // <!--- Perform knn neighbor search using GPU --->
 
     // <!--- Compute normals using GPU --->
     let normal_params = NormalParams {
-        num_points: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
+        num_points: downsampled_target_pts_num as u32,
         vp_x: 0.0,
         vp_y: 0.0,
         vp_z: 0.0,
@@ -206,6 +195,7 @@ fn main() -> Result<()> {
     let target_normals = gpu_normals_ctx_for_target
         .compute_normals(
             &gpu_voxel_ctx_for_target,
+            downsampled_target_pts_num,
             &gpu_knn_search_ctx,
             normal_params,
         )
@@ -220,6 +210,24 @@ fn main() -> Result<()> {
     // <!--- DEBUG --->
     // <!--- Compute normals using GPU --->
 
+    let icp_static_bufs = IcpStaticBuffers {
+        d_source_pts: gpu_transform_ctx_for_source
+            .d_buf_output_pts
+            .as_ref()
+            .context("source pts not allocated")?
+            .clone(),
+        d_target_pts: gpu_voxel_ctx_for_target
+            .d_buf_out_pts
+            .as_ref()
+            .context("target pts not allocated")?
+            .clone(),
+        d_target_normals: gpu_normals_ctx_for_target
+            .d_buf_normals
+            .as_ref()
+            .context("target normals not allocated")?
+            .clone(),
+    };
+
     // let mut current_transform = ndarray::array![
     //     // [0.8660254, -0.5, 0.0, 0.0],
     //     // [0.5, 0.8660254, 0.0, 0.0],
@@ -232,17 +240,6 @@ fn main() -> Result<()> {
     // ];
     let mut current_transform = initial_transform.clone();
     let mut prev_rmse = f32::MAX;
-
-    let search_params = SearchNeighborConsts {
-        num_source: gpu_voxel_ctx_for_source.h_downsampled_pts_num as u32,
-        num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
-    };
-
-    let icp_params = IcpParams {
-        num_source: gpu_voxel_ctx_for_source.h_downsampled_pts_num as i32,
-        num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as i32,
-        max_dist_sq: MAX_DIST_SQ,
-    };
 
     debug!("Starting ICP iterations...");
 
@@ -272,7 +269,7 @@ fn main() -> Result<()> {
             t0: current_transform[[0, 3]],
             t1: current_transform[[1, 3]],
             t2: current_transform[[2, 3]],
-            num_points: gpu_voxel_ctx_for_source.h_downsampled_pts_num as u32,
+            num_points: downsampled_source_pts_num as u32,
         };
 
         // <!--- Compute the transformation of the point clouds using GPU voxelization --->
@@ -289,8 +286,9 @@ fn main() -> Result<()> {
         let (neighbor_indices, neighbor_distances) = gpu_neighbor_search_ctx
             .search_neighbor(
                 &gpu_transform_ctx_for_source,
+                downsampled_source_pts_num,
                 &gpu_voxel_ctx_for_target,
-                search_params,
+                downsampled_target_pts_num,
             )
             .context("Failed to perform neighbor search using GPU")?;
 
@@ -304,7 +302,7 @@ fn main() -> Result<()> {
         // <!--- Check convergence (RMSE) --->
         let mut sum = 0.0f32;
         let mut cnt = 0usize;
-        for j in 0..search_params.num_source as usize {
+        for j in 0..downsampled_source_pts_num {
             let idx = neighbor_indices[j];
             if idx < 0 || neighbor_distances[j] > current_max_dist_sq {
                 continue;
@@ -331,13 +329,11 @@ fn main() -> Result<()> {
         // <!--- Compute ICP using GPU --->
         let (h_H, h_b) = gpu_icp_ctx
             .compute_icp(
-                &gpu_transform_ctx_for_source,
-                icp_params.num_source as usize,
-                &gpu_voxel_ctx_for_target,
-                icp_params.num_target as usize,
-                &gpu_normals_ctx_for_target,
+                &icp_static_bufs,
                 &gpu_neighbor_search_ctx,
-                icp_params.max_dist_sq,
+                downsampled_source_pts_num as usize,
+                downsampled_target_pts_num as usize,
+                current_max_dist_sq,
             )
             .context("Failed to compute ICP using GPU")?;
 
@@ -374,7 +370,7 @@ fn main() -> Result<()> {
         t0: current_transform[[0, 3]],
         t1: current_transform[[1, 3]],
         t2: current_transform[[2, 3]],
-        num_points: gpu_voxel_ctx_for_source.h_downsampled_pts_num as u32,
+        num_points: downsampled_source_pts_num as u32,
     };
 
     gpu_transform_ctx_for_source
