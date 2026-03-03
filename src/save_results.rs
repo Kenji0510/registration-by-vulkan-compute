@@ -18,6 +18,7 @@ pub fn save_results(
     source_pcd: &Vec<PointXYZ>,
     target_pcd: &Vec<PointXYZ>,
     max_iterations: usize,
+    label: &str,
 ) -> Result<()> {
     // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
     gpu_contexts
@@ -50,8 +51,8 @@ pub fn save_results(
     aligned_source_and_target.extend_from_slice(&target_pcd_with_color);
     aligned_source_and_target.extend_from_slice(&source_pcd_with_color);
     let aligned_save_path = format!(
-        "data/output/debug/aligned-source-and-target_iter-{}.pcd",
-        max_iterations
+        "data/output/debug/integrate-reverse-pattern/aligned-source-and-target_{}_iter-{}.pcd",
+        label, max_iterations
     );
     debug!(
         "Saving aligned source and target point cloud to: {}",

@@ -33,7 +33,7 @@ pub fn registration_icp(
     voxel_size: f32,
     max_iterations: usize,
     min_rmse: f32,
-) -> Result<Array2<f32>> {
+) -> Result<(Array2<f32>, f32)> {
     let downsampled_source_pts_num = gpu_contexts.voxel_gpu_ctx_source.h_downsampled_pts_num;
     let downsampled_target_pts_num = gpu_contexts.voxel_gpu_ctx_target.h_downsampled_pts_num;
 
@@ -140,6 +140,7 @@ pub fn registration_icp(
     };
 
     let mut current_transform = initial_center_transform.clone();
+    let mut rmse = 0.0f32;
     let mut prev_rmse = f32::MAX;
 
     debug!("Starting ICP iterations...");
@@ -148,14 +149,15 @@ pub fn registration_icp(
     for iter in 0..max_iterations {
         debug!("--- ICP Iteration {} ---", iter + 1);
 
-        let current_max_dist = if iter < 10 {
-            3.0
-        } else if iter < 15 {
-            1.0
-        } else {
-            voxel_size * 2.0
-        };
-        let current_max_dist_sq = current_max_dist * current_max_dist;
+        // let current_max_dist = if iter < (max_iterations / 2) as usize {
+        //     3.0
+        // } else if iter < (max_iterations * 3 / 4) as usize {
+        //     1.0
+        // } else {
+        //     voxel_size * 2.0
+        // };
+        // let current_max_dist_sq = current_max_dist * current_max_dist;
+        let current_max_dist_sq = 10.0;
 
         let transform_params_source = TransformParams {
             r00: current_transform[[0, 0]],
@@ -214,7 +216,7 @@ pub fn registration_icp(
             cnt += 1;
         }
 
-        let rmse = if cnt > 0 {
+        rmse = if cnt > 0 {
             (sum / cnt as f32).sqrt()
         } else {
             0.0
@@ -258,7 +260,7 @@ pub fn registration_icp(
         // <!--- Update the current transformation --->
     }
 
-    Ok(current_transform)
+    Ok((current_transform, rmse))
 }
 
 fn solve_linear_system_6x6(a: Array2<f64>, b: Array1<f64>) -> Result<Array2<f32>> {
@@ -339,7 +341,7 @@ fn convert_se3_to_matrix4(x: Array1<f64>) -> Array2<f32> {
     ]
 }
 
-fn mat4_mul(a: &Array2<f32>, b: &Array2<f32>) -> Array2<f32> {
+pub fn mat4_mul(a: &Array2<f32>, b: &Array2<f32>) -> Array2<f32> {
     // a(4x4) * b(4x4)
     let mut out = Array2::<f32>::zeros((4, 4));
     for i in 0..4 {

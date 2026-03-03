@@ -19,7 +19,14 @@ use registration_vulkan::{
         PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz,
         save_pcd, save_pcd_with_covs, save_xyz_pcd,
     },
-    registration::{GpuContexts, calculate_target_center, registration_icp},
+    registration::{GpuContexts, calculate_target_center, mat4_mul, registration_icp},
+    reverse_pattern::{
+        create_fb_flip_matrix, create_lr_flip_matrix, create_original_matrix,
+        create_rot_90_x_matrix, create_rot_90_y_matrix, create_rot_90_z_matrix,
+        create_rot_180_x_matrix, create_rot_180_y_matrix, create_rot_180_z_matrix,
+        create_rot_minus_90_x_matrix, create_rot_minus_90_y_matrix, create_rot_minus_90_z_matrix,
+        create_ud_flip_matrix,
+    },
     save_results::save_results,
     transform_data::pcd_to_vecf32,
 };
@@ -32,7 +39,7 @@ const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
 const VOXEL_SIZE: f32 = 0.25;
 const MAX_DIST_SQ: f32 = 10.0;
 const MIN_RMSE: f32 = VOXEL_SIZE * 0.5;
-const MAX_ITERATIONS: usize = 20;
+const MAX_ITERATIONS: usize = 40;
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
@@ -83,6 +90,24 @@ fn main() -> Result<()> {
     info!("Points num of source: {}", source_pts_vec.len());
     info!("Points num of target: {}", target_pts_vec.len());
 
+    let flip_rot_transforms = vec![
+        ("Original", create_original_matrix()),
+        ("LR_Flip_Reverse-Y", create_lr_flip_matrix()),
+        ("UD_Flip_Reverse-Z", create_ud_flip_matrix()),
+        ("Front-Back_Flip_Reverse-X", create_fb_flip_matrix()),
+        ("Rot_180_Z", create_rot_180_z_matrix()),
+        ("Rot_180_Y", create_rot_180_y_matrix()),
+        ("Rot_180_X", create_rot_180_x_matrix()),
+        ("Rot_90_X", create_rot_90_x_matrix()),
+        ("Rot_-90_X", create_rot_minus_90_x_matrix()),
+        ("Rot_90_Y", create_rot_90_y_matrix()),
+        ("Rot_-90_Y", create_rot_minus_90_y_matrix()),
+        ("Rot_90_Z", create_rot_90_z_matrix()),
+        ("Rot_-90_Z", create_rot_minus_90_z_matrix()),
+    ];
+
+    let start = std::time::Instant::now();
+
     // <!--- Calculate the initial center transformation for source to target. With voxelization --->
     let initial_center_transform = calculate_target_center(
         &mut gpu_contexts,
@@ -98,46 +123,80 @@ fn main() -> Result<()> {
         initial_center_transform
     );
 
-    // <!--- Perform ICP iterations --->
-    let icp_matrix = registration_icp(
-        &mut gpu_contexts,
-        &initial_center_transform,
-        VOXEL_SIZE,
-        MAX_ITERATIONS,
-        MIN_RMSE,
-    )
-    .context("Failed to process ICP registration")?;
-    // <!--- Perform ICP iterations --->
+    let mut registration_results = Vec::new();
 
-    debug!("Final transformation matrix:\n{:?}", icp_matrix);
+    for (label, transform) in flip_rot_transforms.iter() {
+        let combined_transform = mat4_mul(transform, &initial_center_transform);
+        debug!(
+            "Combined initial transformation with {}:\n{:?}",
+            label, combined_transform
+        );
 
-    // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
-    let final_transform_params = TransformParams {
-        r00: icp_matrix[[0, 0]],
-        r01: icp_matrix[[0, 1]],
-        r02: icp_matrix[[0, 2]],
-        r10: icp_matrix[[1, 0]],
-        r11: icp_matrix[[1, 1]],
-        r12: icp_matrix[[1, 2]],
-        r20: icp_matrix[[2, 0]],
-        r21: icp_matrix[[2, 1]],
-        r22: icp_matrix[[2, 2]],
-        t0: icp_matrix[[0, 3]],
-        t1: icp_matrix[[1, 3]],
-        t2: icp_matrix[[2, 3]],
-        num_points: gpu_contexts.voxel_gpu_ctx_source.h_downsampled_pts_num as u32,
-    };
+        // <!--- Perform ICP iterations --->
+        let (icp_matrix, rmse) = registration_icp(
+            &mut gpu_contexts,
+            &combined_transform,
+            VOXEL_SIZE,
+            MAX_ITERATIONS,
+            MIN_RMSE,
+        )
+        .context("Failed to process ICP registration")?;
+        debug!("Final transformation matrix:\n{:?}", icp_matrix);
+        debug!("Final RMSE: {}", rmse);
+        // <!--- Perform ICP iterations --->
 
-    save_results(
-        &mut gpu_contexts,
-        &final_transform_params,
-        &source_pcd,
-        &target_pcd,
-        MAX_ITERATIONS,
-    )
-    .context("Failed to save results")?;
+        registration_results.push((label.to_string(), icp_matrix, rmse));
+    }
 
-    // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
+    let elapsed = start.elapsed();
+    info!("Total registration time: {:.2?}", elapsed);
+
+    registration_results.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap_or(std::cmp::Ordering::Equal));
+
+    info!("=== Registration Results ===");
+    for (label, icp_matrix, rmse) in registration_results.iter() {
+        // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
+        let final_transform_params = TransformParams {
+            r00: icp_matrix[[0, 0]],
+            r01: icp_matrix[[0, 1]],
+            r02: icp_matrix[[0, 2]],
+            r10: icp_matrix[[1, 0]],
+            r11: icp_matrix[[1, 1]],
+            r12: icp_matrix[[1, 2]],
+            r20: icp_matrix[[2, 0]],
+            r21: icp_matrix[[2, 1]],
+            r22: icp_matrix[[2, 2]],
+            t0: icp_matrix[[0, 3]],
+            t1: icp_matrix[[1, 3]],
+            t2: icp_matrix[[2, 3]],
+            num_points: gpu_contexts.voxel_gpu_ctx_source.h_downsampled_pts_num as u32,
+        };
+
+        save_results(
+            &mut gpu_contexts,
+            &final_transform_params,
+            &source_pcd,
+            &target_pcd,
+            MAX_ITERATIONS,
+            label,
+        )
+        .context("Failed to save results")?;
+        // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
+
+        info!("Saved results for transformation: {}", label);
+        info!("Final RMSE for transformation {}: {}", label, rmse);
+    }
+    info!("=== Registration Results ===");
+
+    let best_registration = registration_results
+        .iter()
+        .min_by(|a, b| a.2.partial_cmp(&b.2).unwrap_or(std::cmp::Ordering::Equal));
+    if let Some((best_label, _, best_rmse)) = best_registration {
+        info!("Best registration result: {}", best_label);
+        info!("Best RMSE: {}", best_rmse);
+    } else {
+        info!("No valid registration results found.");
+    }
 
     Ok(())
 }
