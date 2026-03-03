@@ -128,7 +128,9 @@ impl IcpGpuContext {
             self.d_buf_h = Some(Buffer::new_slice::<f32>(
                 memory_allocator.clone(),
                 BufferCreateInfo {
-                    usage: BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_SRC,
+                    usage: BufferUsage::STORAGE_BUFFER
+                        | BufferUsage::TRANSFER_SRC
+                        | BufferUsage::TRANSFER_DST,
                     ..Default::default()
                 },
                 AllocationCreateInfo {
@@ -141,7 +143,9 @@ impl IcpGpuContext {
             self.d_buf_b = Some(Buffer::new_slice::<f32>(
                 memory_allocator.clone(),
                 BufferCreateInfo {
-                    usage: BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_SRC,
+                    usage: BufferUsage::STORAGE_BUFFER
+                        | BufferUsage::TRANSFER_SRC
+                        | BufferUsage::TRANSFER_DST,
                     ..Default::default()
                 },
                 AllocationCreateInfo {
@@ -251,6 +255,26 @@ impl IcpGpuContext {
             CommandBufferUsage::OneTimeSubmit,
         )
         .context("Failed to create command buffer builder")?;
+
+        command_buffer_builder
+            .fill_buffer(
+                self.d_buf_h
+                    .as_ref()
+                    .context("Failed to get H buffer")?
+                    .clone()
+                    .reinterpret::<[u32]>(),
+                0u32,
+            )
+            .context("Failed to fill H buffer with zeros")?
+            .fill_buffer(
+                self.d_buf_b
+                    .as_ref()
+                    .context("Failed to get b buffer")?
+                    .clone()
+                    .reinterpret::<[u32]>(),
+                0u32,
+            )
+            .context("Failed to fill b buffer with zeros")?;
 
         const LOCAL_SIZE: u32 = 64; // Match the local size to BLOCK_SIZE in the shader
         let group_count_x = (source_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;

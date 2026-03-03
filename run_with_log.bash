@@ -1,0 +1,1 @@
+cargo run > log.txt 2>&1

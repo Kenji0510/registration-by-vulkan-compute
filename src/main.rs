@@ -1,8 +1,9 @@
 use core::f32;
+use std::char::MAX;
 
 use anyhow::{Context, Result};
 use log::{debug, info};
-use ndarray::{Array1, Array2};
+use ndarray::{Array1, Array2, Axis, s};
 use ndarray_linalg::Solve;
 use registration_vulkan::{
     gpu_copy::copy_d_to_h,
@@ -14,16 +15,21 @@ use registration_vulkan::{
     gpu_transform::{TransformGpuContext, TransformParams},
     gpu_voxel::VoxelGpuContext,
     init_gpu::VulkanContext,
-    oprate_pcd::{convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, save_pcd, save_pcd_with_covs},
+    oprate_pcd::{
+        PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, save_pcd, save_pcd_with_covs, save_xyz_pcd
+    },
     transform_data::pcd_to_vecf32,
 };
+use vulkano::instance::debug;
 
-// const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd";
-const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
+const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd";
+// const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
 const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
 
 const VOXEL_SIZE: f32 = 0.25;
-const TOLERANCE: f32 = VOXEL_SIZE * VOXEL_SIZE;
+const MAX_DIST_SQ: f32 = 10.0;
+const MIN_RMSE: f32 = VOXEL_SIZE * 0.5;
+const MAX_ITERATIONS: usize = 20;
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
@@ -88,6 +94,17 @@ fn main() -> Result<()> {
     );
     // <!--- Downsample the point clouds using GPU voxelization --->
 
+
+    // <!--- Calculate the centroids of the downsampled point clouds and translate them to the origin --->
+    let downsampled_source_arr = convert_vecf32_to_arr2_f32(&downsampled_source_pts);
+    let downsampled_target_arr = convert_vecf32_to_arr2_f32(&downsampled_target_pts);
+    let initial_transform =
+        registration_pcd_center(&downsampled_source_arr, &downsampled_target_arr);
+
+    debug!("Source centroid translation:\n{}", initial_transform);
+    // <!--- Calculate the centroids of the downsampled point clouds and translate them to the origin --->
+
+
     // <!--- Compute the covariance of the point clouds using GPU voxelization --->
     let d_source_covs = gpu_covariance_ctx_for_source
         .compute_covariances(
@@ -108,13 +125,13 @@ fn main() -> Result<()> {
     // <!--- Compute the covariance of the point clouds using GPU voxelization --->
 
     // <!--- Compute the transformation of the point clouds using GPU voxelization --->
-    // Z軸基準で180度回転
+    // Z軸基準で30度回転
     // let transform_params_source = TransformParams {
-    //     r00: -1.0,
-    //     r01: 0.0,
+    //     r00: 0.8660254,
+    //     r01: 0.5,
     //     r02: 0.0,
-    //     r10: 0.0,
-    //     r11: -1.0,
+    //     r10: -0.5,
+    //     r11: 0.8660254,
     //     r12: 0.0,
     //     r20: 0.0,
     //     r21: 0.0,
@@ -125,18 +142,18 @@ fn main() -> Result<()> {
     //     num_points: downsampled_source_pts.len() as u32,
     // };
     let transform_params_source = TransformParams {
-        r00: 1.0,
-        r01: 0.0,
-        r02: 0.0,
-        r10: 0.0,
-        r11: 1.0,
-        r12: 0.0,
-        r20: 0.0,
-        r21: 0.0,
-        r22: 1.0,
-        t0: 0.0,
-        t1: 0.0,
-        t2: 0.0,
+        r00: initial_transform[[0, 0]],
+        r01: initial_transform[[0, 1]],
+        r02: initial_transform[[0, 2]],
+        r10: initial_transform[[1, 0]],
+        r11: initial_transform[[1, 1]],
+        r12: initial_transform[[1, 2]],
+        r20: initial_transform[[2, 0]],
+        r21: initial_transform[[2, 1]],
+        r22: initial_transform[[2, 2]],
+        t0: initial_transform[[0, 3]],
+        t1: initial_transform[[1, 3]],
+        t2: initial_transform[[2, 3]],
         num_points: downsampled_source_pts.len() as u32,
     };
     gpu_transform_ctx_for_source
@@ -149,55 +166,34 @@ fn main() -> Result<()> {
     // <!--- Compute the transformation of the point clouds using GPU voxelization --->
 
     // <!--- Copy the downsampled points and their covariances from GPU to CPU --->
-    let (h_downsampled_source_pts, h_downsampled_source_covs) = copy_d_to_h(
-        // &vulkan_context,
-        &gpu_voxel_ctx_for_source,
-        &gpu_transform_ctx_for_source,
-    )
-    .context("Failed to copy downsampled points and covariances from GPU to CPU")?;
-    // <!--- Copy the downsampled points and their covariances from GPU to CPU --->
+    // let (h_downsampled_source_pts, h_downsampled_source_covs) = copy_d_to_h(
+    //     // &vulkan_context,
+    //     &gpu_voxel_ctx_for_source,
+    //     &gpu_transform_ctx_for_source,
+    // )
+    // .context("Failed to copy downsampled points and covariances from GPU to CPU")?;
+    // // <!--- Copy the downsampled points and their covariances from GPU to CPU --->
 
+    // // <!--- DEBUG --->
+    // let downsampled_source_pts_with_covs =
+    //     convert_vecf32_to_pcd_xyz_covs(&h_downsampled_source_pts, &h_downsampled_source_covs);
+    // let debug_save_path = "data/output/debug/downsampled_source_with_covs.pcd";
+    // debug!(
+    //     "Saving downsampled source points with covariances to: {}",
+    //     debug_save_path
+    // );
+    // save_pcd_with_covs(&downsampled_source_pts_with_covs, debug_save_path)
+    //     .context("Failed to save downsampled source points with covariances")?;
     // <!--- DEBUG --->
-    let downsampled_source_pts_with_covs =
-        convert_vecf32_to_pcd_xyz_covs(&h_downsampled_source_pts, &h_downsampled_source_covs);
-    let debug_save_path = "data/output/debug/downsampled_source_with_covs.pcd";
-    debug!(
-        "Saving downsampled source points with covariances to: {}",
-        debug_save_path
-    );
-    save_pcd_with_covs(&downsampled_source_pts_with_covs, debug_save_path)
-        .context("Failed to save downsampled source points with covariances")?;
-    // <!--- DEBUG --->
-
-    // <!--- Perform neighbor search using GPU --->
-    let search_params = SearchNeighborConsts {
-        num_source: gpu_transform_ctx_for_source.num_points as u32,
-        num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
-    };
-
-    let (neighbor_indices, neighbor_distances) = gpu_neighbor_search_ctx
-        .search_neighbor(
-            &gpu_transform_ctx_for_source,
-            &gpu_voxel_ctx_for_target,
-            search_params,
-        )
-        .context("Failed to perform neighbor search using GPU")?;
-
-    // <!--- DEBUG --->
-    // println!("Neighbor indices: {:?}", neighbor_indices);
-    // println!("Neighbor distances: {:?}", neighbor_distances);
-    // <!--- DEBUG --->
-
-    // <!--- Perform neighbor search using GPU --->
 
     // <!--- Perform knn neighbor search using GPU --->
     let knn_search_params = KnnSearchConsts {
-        num_points: gpu_transform_ctx_for_source.num_points as u32,
+        num_points: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
     };
+
     gpu_knn_search_ctx
         .knn_search_neighbors(&gpu_voxel_ctx_for_target, knn_search_params)
         .context("Failed to perform knn neighbor search using GPU")?;
-
     // <!--- Perform knn neighbor search using GPU --->
 
     // <!--- Compute normals using GPU --->
@@ -224,62 +220,196 @@ fn main() -> Result<()> {
     // <!--- DEBUG --->
     // <!--- Compute normals using GPU --->
 
-    // <!--- Compute ICP using GPU --->
-    let icp_params = IcpParams {
-        num_source: gpu_transform_ctx_for_source.num_points as i32,
-        num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as i32,
-        max_dist_sq: TOLERANCE,
+    // let mut current_transform = ndarray::array![
+    //     // [0.8660254, -0.5, 0.0, 0.0],
+    //     // [0.5, 0.8660254, 0.0, 0.0],
+    //     // [0.0, 0.0, 1.0, 0.0],
+    //     // [0.0, 0.0, 0.0, 1.0]
+    //     [1.0, 0.0, 0.0, 0.0],
+    //     [0.0, 1.0, 0.0, 0.0],
+    //     [0.0, 0.0, 1.0, 0.0],
+    //     [0.0, 0.0, 0.0, 1.0]
+    // ];
+    let mut current_transform = initial_transform.clone();
+    let mut prev_rmse = f32::MAX;
+
+    let search_params = SearchNeighborConsts {
+        num_source: gpu_voxel_ctx_for_source.h_downsampled_pts_num as u32,
+        num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as u32,
     };
-    let (h_H, h_b) = gpu_icp_ctx
-        .compute_icp(
-            &gpu_transform_ctx_for_source,
-            icp_params.num_source as usize,
-            &gpu_voxel_ctx_for_target,
-            icp_params.num_target as usize,
-            &gpu_normals_ctx_for_target,
-            &gpu_neighbor_search_ctx,
-            icp_params.max_dist_sq,
+
+    let icp_params = IcpParams {
+        num_source: gpu_voxel_ctx_for_source.h_downsampled_pts_num as i32,
+        num_target: gpu_voxel_ctx_for_target.h_downsampled_pts_num as i32,
+        max_dist_sq: MAX_DIST_SQ,
+    };
+
+    debug!("Starting ICP iterations...");
+
+    // <!--- Perform ICP iterations --->
+    for iter in 0..MAX_ITERATIONS {
+        debug!("--- ICP Iteration {} ---", iter + 1);
+
+        let current_max_dist = if iter < 10 {
+            3.0
+        } else if iter < 15 {
+            1.0
+        } else {
+            VOXEL_SIZE * 2.0
+        };
+        let current_max_dist_sq = current_max_dist * current_max_dist;
+
+        let transform_params_source = TransformParams {
+            r00: current_transform[[0, 0]],
+            r01: current_transform[[0, 1]],
+            r02: current_transform[[0, 2]],
+            r10: current_transform[[1, 0]],
+            r11: current_transform[[1, 1]],
+            r12: current_transform[[1, 2]],
+            r20: current_transform[[2, 0]],
+            r21: current_transform[[2, 1]],
+            r22: current_transform[[2, 2]],
+            t0: current_transform[[0, 3]],
+            t1: current_transform[[1, 3]],
+            t2: current_transform[[2, 3]],
+            num_points: gpu_voxel_ctx_for_source.h_downsampled_pts_num as u32,
+        };
+
+        // <!--- Compute the transformation of the point clouds using GPU voxelization --->
+        gpu_transform_ctx_for_source
+            .transform(
+                &gpu_voxel_ctx_for_source,
+                &gpu_covariance_ctx_for_source,
+                transform_params_source,
+            )
+            .context("Failed to transform points and covariances for source")?;
+        // <!--- Compute the transformation of the point clouds using GPU voxelization --->
+
+        // <!--- Perform neighbor search using GPU --->
+        let (neighbor_indices, neighbor_distances) = gpu_neighbor_search_ctx
+            .search_neighbor(
+                &gpu_transform_ctx_for_source,
+                &gpu_voxel_ctx_for_target,
+                search_params,
+            )
+            .context("Failed to perform neighbor search using GPU")?;
+
+        // <!--- DEBUG --->
+        // println!("Neighbor indices: {:?}", neighbor_indices);
+        // println!("Neighbor distances: {:?}", neighbor_distances);
+        // <!--- DEBUG --->
+
+        // <!--- Perform neighbor search using GPU --->
+
+        // <!--- Check convergence (RMSE) --->
+        let mut sum = 0.0f32;
+        let mut cnt = 0usize;
+        for j in 0..search_params.num_source as usize {
+            let idx = neighbor_indices[j];
+            if idx < 0 || neighbor_distances[j] > current_max_dist_sq {
+                continue;
+            }
+            sum += neighbor_distances[j];
+            cnt += 1;
+        }
+
+        let rmse = if cnt > 0 {
+            (sum / cnt as f32).sqrt()
+        } else {
+            0.0
+        };
+        debug!("Iter {}: RMSE = {:.6}, Valid points = {}", iter, rmse, cnt);
+
+        // if (prev_rmse - rmse).abs() < TOLERANCE {
+        if rmse < MIN_RMSE {
+            info!("Converged! (RMSE difference is less than threshold)");
+            break;
+        }
+        prev_rmse = rmse;
+        // <!--- Check convergence (RMSE) --->
+
+        // <!--- Compute ICP using GPU --->
+        let (h_H, h_b) = gpu_icp_ctx
+            .compute_icp(
+                &gpu_transform_ctx_for_source,
+                icp_params.num_source as usize,
+                &gpu_voxel_ctx_for_target,
+                icp_params.num_target as usize,
+                &gpu_normals_ctx_for_target,
+                &gpu_neighbor_search_ctx,
+                icp_params.max_dist_sq,
+            )
+            .context("Failed to compute ICP using GPU")?;
+
+        let h_matrix = Array2::from_shape_vec((6, 6), h_H.iter().map(|&v| v as f64).collect())?;
+        let b_vector = Array1::from_shape_vec(6, h_b.iter().map(|&v| v as f64).collect())?;
+
+        let delta_matrix = match solve_linear_system_6x6(h_matrix, b_vector) {
+            Ok(mat) => mat,
+            Err(_) => {
+                log::warn!("Linear solve failed (singular matrix). Stopping ICP.");
+                break;
+            }
+        };
+        // <!--- Compute ICP using GPU --->
+
+        // <!--- Update the current transformation --->
+        current_transform = mat4_mul(&delta_matrix, &current_transform);
+        // <!--- Update the current transformation --->
+    }
+
+    debug!("Final transformation matrix:\n{:?}", current_transform);
+
+    // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
+    let final_transform_params = TransformParams {
+        r00: current_transform[[0, 0]],
+        r01: current_transform[[0, 1]],
+        r02: current_transform[[0, 2]],
+        r10: current_transform[[1, 0]],
+        r11: current_transform[[1, 1]],
+        r12: current_transform[[1, 2]],
+        r20: current_transform[[2, 0]],
+        r21: current_transform[[2, 1]],
+        r22: current_transform[[2, 2]],
+        t0: current_transform[[0, 3]],
+        t1: current_transform[[1, 3]],
+        t2: current_transform[[2, 3]],
+        num_points: gpu_voxel_ctx_for_source.h_downsampled_pts_num as u32,
+    };
+
+    gpu_transform_ctx_for_source
+        .transform(
+            &gpu_voxel_ctx_for_source,
+            &gpu_covariance_ctx_for_source,
+            final_transform_params,
         )
-        .context("Failed to compute ICP using GPU")?;
-    // <!--- DEBUG --->
-    println!("H (6x6 matrix):");
-    for i in 0..6 {
-        println!("{:.6} {:.6} {:.6} {:.6} {:.6} {:.6}", h_H[i * 6], h_H[i * 6 + 1], h_H[i * 6 + 2], h_H[i * 6 + 3], h_H[i * 6 + 4], h_H[i * 6 + 5]);
-    }
-    println!("b (6x1 vector):");
-    for i in 0..6 {
-        println!("{:.6}", h_b[i]);
-    }
-    // <!--- DEBUG --->
+        .context("Failed to apply final transformation to source points using GPU")?;
 
-    let h_matrix = Array2::from_shape_vec((6, 6), h_H.iter().map(|&v| v as f64).collect())?;
-    let b_vector = Array1::from_shape_vec(6, h_b.iter().map(|&v| v as f64).collect())?;
-    let delta_matrix = solve_linear_system_6x6(h_matrix, b_vector)?;
+    let transformed_source_pts =
+        copy_d_to_h(&gpu_voxel_ctx_for_source, &gpu_transform_ctx_for_source)
+            .context("Failed to copy transformed source points from GPU to CPU")?;
 
-    println!("Delta transformation matrix:");
-    for i in 0..4 {
-        println!("{:.6} {:.6} {:.6} {:.6}", delta_matrix[[i, 0]], delta_matrix[[i, 1]], delta_matrix[[i, 2]], delta_matrix[[i, 3]]);
-    }
+    let transformed_source_pts_vecf32: Vec<[f32; 3]> = transformed_source_pts
+        .0
+        .iter()
+        .map(|p| [p[0], p[1], p[2]])
+        .collect();
 
-    // Check convergence (RMSE)
-    let mut sum = 0.0f32;
-    let mut cnt = 0usize;
-    let mut rmse = 0.0f32;
+    let aligned_source_pcd = convert_vecf32_to_pcd_xyz(&transformed_source_pts_vecf32);
+    let mut aligned_source_and_target = aligned_source_pcd.clone();
+    aligned_source_and_target.extend_from_slice(&target_pcd);
+    let aligned_save_path = format!(
+        "data/output/debug/aligned-source-and-target_iter-{}.pcd",
+        MAX_ITERATIONS
+    );
+    debug!(
+        "Saving aligned source and target point cloud to: {}",
+        aligned_save_path
+    );
+    save_xyz_pcd(&aligned_source_and_target, &aligned_save_path)
+        .context("Failed to save aligned source and target point cloud")?;
 
-    for j in 0..transform_params_source.num_points as usize {
-        let idx = neighbor_indices[j];
-        if idx < 0 {
-            continue;
-        }
-        if neighbor_distances[j] > TOLERANCE {
-            continue;
-        }
-        sum += neighbor_distances[j];
-        cnt += 1;
-    }
-    rmse = (sum / cnt as f32).sqrt();
-    debug!("RMSE: {}, count of valid correspondences: {}", rmse, cnt);
-    // <!--- Compute ICP using GPU --->
+    // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
 
     Ok(())
 }
@@ -375,4 +505,34 @@ fn mat4_mul(a: &Array2<f32>, b: &Array2<f32>) -> Array2<f32> {
         }
     }
     out
+}
+
+fn registration_pcd_center(
+    source_points: &Array2<f32>,
+    target_points: &Array2<f32>,
+) -> Array2<f32> {
+    // Calculate centroids
+    let source_centroid = source_points.mean_axis(Axis(0)).unwrap();
+    let target_centroid = target_points.mean_axis(Axis(0)).unwrap();
+
+    // Calculate translation (Move source centroid to target centroid)
+    let translation = &target_centroid - &source_centroid;
+
+    // Create transformation matrix
+    let mut transform = Array2::<f32>::eye(4);
+    transform[[0, 3]] = translation[0];
+    transform[[1, 3]] = translation[1];
+    transform[[2, 3]] = translation[2];
+
+    transform
+}
+
+fn convert_vecf32_to_arr2_f32(pts: &[[f32; 3]]) -> Array2<f32> {
+    let mut arr = Array2::<f32>::zeros((pts.len(), 3));
+    for (i, point) in pts.iter().enumerate() {
+        arr[[i, 0]] = point[0];
+        arr[[i, 1]] = point[1];
+        arr[[i, 2]] = point[2];
+    }
+    arr
 }

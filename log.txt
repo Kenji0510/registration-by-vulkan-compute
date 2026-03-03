@@ -1,0 +1,367 @@
+warning: unused imports: `debug` and `info`
+ --> src/gpu_copy.rs:2:11
+  |
+2 | use log::{debug, info};
+  |           ^^^^^  ^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `ndarray::Array2`
+ --> src/gpu_copy.rs:3:5
+  |
+3 | use ndarray::Array2;
+  |     ^^^^^^^^^^^^^^^
+
+warning: unused imports: `AllocationCreateInfo`, `BufferCreateInfo`, `BufferUsage`, `Buffer`, `MemoryTypeFilter`, and `instance::debug`
+ --> src/gpu_copy.rs:5:14
+  |
+5 |     buffer::{Buffer, BufferCreateInfo, BufferUsage},
+  |              ^^^^^^  ^^^^^^^^^^^^^^^^  ^^^^^^^^^^^
+6 |     instance::debug,
+  |     ^^^^^^^^^^^^^^^
+7 |     memory::allocator::{AllocationCreateInfo, MemoryTypeFilter},
+  |                         ^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^
+
+warning: unused imports: `gpu_covariance::CovarianceGpuContext` and `init_gpu::VulkanContext`
+  --> src/gpu_copy.rs:11:5
+   |
+11 |     gpu_covariance::CovarianceGpuContext, gpu_transform::TransformGpuContext,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 |     gpu_voxel::VoxelGpuContext, init_gpu::VulkanContext,
+   |                                 ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `core::num`
+ --> src/gpu_voxel.rs:2:5
+  |
+2 | use core::num;
+  |     ^^^^^^^^^
+
+warning: unused import: `Context`
+ --> src/oprate_pcd.rs:1:14
+  |
+1 | use anyhow::{Context, Result};
+  |              ^^^^^^^
+
+warning: unused variable: `pts`
+  --> src/gpu_covariance.rs:96:9
+   |
+96 |         pts: &[[f32; 3]],
+   |         ^^^ help: if this is intentional, prefix it with an underscore: `_pts`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `only_compute_covs`
+  --> src/gpu_covariance.rs:98:9
+   |
+98 |         only_compute_covs: bool,
+   |         ^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_only_compute_covs`
+
+warning: unused variable: `query_pool`
+   --> src/gpu_covariance.rs:222:13
+    |
+222 |         let query_pool = if timestamps_supported {
+    |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_query_pool`
+
+warning: unused variable: `query_pool`
+   --> src/gpu_icp.rs:293:13
+    |
+293 |         let query_pool = if timestamps_supported {
+    |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_query_pool`
+
+warning: unused variable: `query_pool`
+   --> src/gpu_knn_search.rs:207:13
+    |
+207 |         let query_pool = if timestamps_supported {
+    |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_query_pool`
+
+warning: unused variable: `query_pool`
+   --> src/gpu_normals.rs:211:13
+    |
+211 |         let query_pool = if timestamps_supported {
+    |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_query_pool`
+
+warning: unused variable: `query_pool`
+   --> src/gpu_search_neighbor.rs:241:13
+    |
+241 |         let query_pool = if timestamps_supported {
+    |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_query_pool`
+
+warning: unused variable: `query_pool`
+   --> src/gpu_transform.rs:259:13
+    |
+259 |         let query_pool = if timestamps_supported {
+    |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_query_pool`
+
+warning: unused variable: `descriptor_set_allocator`
+   --> src/gpu_voxel.rs:154:13
+    |
+154 |         let descriptor_set_allocator = Arc::new(StandardDescriptorSetAllocator::new(
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_descriptor_set_allocator`
+
+warning: unused variable: `query_pool`
+   --> src/gpu_voxel.rs:591:13
+    |
+591 |         let query_pool = if timestamps_supported {
+    |             ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_query_pool`
+
+warning: field `d_buf_input_pts` is never read
+  --> src/gpu_covariance.rs:30:5
+   |
+23 | pub struct CovarianceGpuContext {
+   |            -------------------- field in this struct
+...
+30 |     d_buf_input_pts: Option<Subbuffer<[f32]>>,
+   |     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `staging_h_buf_input_pts` is never read
+  --> src/gpu_voxel.rs:45:5
+   |
+32 | pub struct VoxelGpuContext {
+   |            --------------- field in this struct
+...
+45 |     staging_h_buf_input_pts: Option<Subbuffer<[f32]>>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `registration_vulkan` (lib) generated 18 warnings (run `cargo fix --lib -p registration_vulkan` to apply 16 suggestions)
+   Compiling registration_vulkan v0.1.0 (/home/kenji/workspace/rust/registration_vulkan)
+warning: unused import: `std::char::MAX`
+ --> src/main.rs:2:5
+  |
+2 | use std::char::MAX;
+  |     ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `s`
+ --> src/main.rs:6:37
+  |
+6 | use ndarray::{Array1, Array2, Axis, s};
+  |                                     ^
+
+warning: unused imports: `PointXYZ`, `convert_vecf32_to_pcd_xyz_covs`, and `save_pcd_with_covs`
+  --> src/main.rs:19:9
+   |
+19 |         PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, save_pcd, save_pcd_with_covs, save_xyz_pcd
+   |         ^^^^^^^^                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                          ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `vulkano::instance::debug`
+  --> src/main.rs:23:5
+   |
+23 | use vulkano::instance::debug;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variable does not need to be mutable
+  --> src/main.rs:81:9
+   |
+81 |     let mut downsampled_source_pts = gpu_voxel_ctx_for_source
+   |         ----^^^^^^^^^^^^^^^^^^^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+   = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+  --> src/main.rs:84:9
+   |
+84 |     let mut downsampled_target_pts = gpu_voxel_ctx_for_target
+   |         ----^^^^^^^^^^^^^^^^^^^^^^
+   |         |
+   |         help: remove this `mut`
+
+warning: unused variable: `d_source_covs`
+   --> src/main.rs:109:9
+    |
+109 |     let d_source_covs = gpu_covariance_ctx_for_source
+    |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_d_source_covs`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `d_target_covs`
+   --> src/main.rs:117:9
+    |
+117 |     let d_target_covs = gpu_covariance_ctx_for_target
+    |         ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_d_target_covs`
+
+warning: variable `prev_rmse` is assigned to, but never used
+   --> src/main.rs:234:9
+    |
+234 |     let mut prev_rmse = f32::MAX;
+    |         ^^^^^^^^^^^^^
+    |
+    = note: consider using `_prev_rmse` instead
+
+warning: value assigned to `prev_rmse` is never read
+   --> src/main.rs:328:9
+    |
+328 |         prev_rmse = rmse;
+    |         ^^^^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable `h_H` should have a snake case name
+   --> src/main.rs:332:14
+    |
+332 |         let (h_H, h_b) = gpu_icp_ctx
+    |              ^^^ help: convert the identifier to snake case: `h_h`
+    |
+    = note: `#[warn(non_snake_case)]` (part of `#[warn(nonstandard_style)]`) on by default
+
+warning: `registration_vulkan` (bin "registration_vulkan") generated 11 warnings (run `cargo fix --bin "registration_vulkan" -p registration_vulkan` to apply 8 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.56s
+     Running `target/debug/registration_vulkan`
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] === Available Vulkan Devices ===
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] Device 0: NVIDIA GeForce RTX 4080 (DiscreteGpu)
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] Device 1: llvmpipe (LLVM 15.0.7, 256 bits) (Cpu)
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] ===============================
+    
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] Selected device: NVIDIA GeForce RTX 4080 (DiscreteGpu)
+    
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] === Vulkan Device Information ===
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] Device Name: NVIDIA GeForce RTX 4080
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] Device Type: DiscreteGpu
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] Vulkan context initialized successfully.
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::init_gpu] ===============================
+    
+[2026-03-03T07:00:43Z INFO  registration_vulkan] === Parameters ===
+[2026-03-03T07:00:43Z INFO  registration_vulkan] Source PCD path: data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd
+[2026-03-03T07:00:43Z INFO  registration_vulkan] Target PCD path: data/input/H927/lab-room_voxel_025_xyz_only.pcd
+[2026-03-03T07:00:43Z INFO  registration_vulkan] Voxel size: 0.25
+[2026-03-03T07:00:43Z INFO  registration_vulkan] ====================
+[2026-03-03T07:00:43Z INFO  registration_vulkan] Points num of source: 10134
+[2026-03-03T07:00:43Z INFO  registration_vulkan] Points num of target: 7285
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_voxel] Reallocating buffers for 10134 points
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_voxel] Compute voxelization shader execution time: 471.88µs
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_voxel] Number of output points: 5738
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_voxel] Reallocating buffers for 7285 points
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_voxel] Compute voxelization shader execution time: 140.106µs
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_voxel] Number of output points: 5864
+[2026-03-03T07:00:43Z DEBUG registration_vulkan] Downsampled points num of source: 5738
+[2026-03-03T07:00:43Z DEBUG registration_vulkan] Downsampled points num of target: 5864
+[2026-03-03T07:00:43Z DEBUG registration_vulkan] Source centroid translation:
+    [[1, 0, 0, 6.7348948],
+     [0, 1, 0, 9.63783],
+     [0, 0, 1, 0.27938125],
+     [0, 0, 0, 1]]
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_covariance] Reallocating buffers for 5738 points
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_covariance] Compute covariance shader execution time: 153.932µs
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_covariance] Reallocating buffers for 5864 points
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_covariance] Compute covariance shader execution time: 161.714µs
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_transform] Reallocating buffers for 5738 points
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 122.401µs
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_knn_search] Reallocating buffers for 5864 points
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_knn_search] Compute knn search shader execution time: 883.458µs
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_normals] Reallocating buffers for 5864 points
+[2026-03-03T07:00:43Z DEBUG registration_vulkan::gpu_normals] Compute normals shader execution time: 104.267µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Starting ICP iterations...
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 1 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 124.745µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Reallocating buffers for 5738 points
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 412.751µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 0: RMSE = 0.735016, Valid points = 5697
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Allocating buffers for H and b matrix
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 162.207µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 2 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 106.031µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 403.142µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 1: RMSE = 0.706652, Valid points = 5729
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 146.787µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 3 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 107.264µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 408.061µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 2: RMSE = 0.635725, Valid points = 5738
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 133.371µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 4 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 90.34µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 388.573µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 3: RMSE = 0.550819, Valid points = 5738
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 115.457µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 5 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 91.813µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 387.902µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 4: RMSE = 0.485063, Valid points = 5738
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 119.155µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 6 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 92.425µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 389.387µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 5: RMSE = 0.436425, Valid points = 5738
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 119.656µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 7 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 91.844µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 389.255µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 6: RMSE = 0.408677, Valid points = 5738
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 122.552µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 8 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 93.266µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 433.358µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 7: RMSE = 0.392721, Valid points = 5738
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 120.498µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 9 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 91.173µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 389.095µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 8: RMSE = 0.383314, Valid points = 5738
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 117.942µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 10 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 89.79µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 393.834µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 9: RMSE = 0.377331, Valid points = 5738
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 117.612µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 11 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 88.466µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 393.554µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 10: RMSE = 0.325457, Valid points = 5577
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 122.932µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 12 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 93.185µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 386.631µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 11: RMSE = 0.322837, Valid points = 5582
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 117.551µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 13 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 90.211µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 388.342µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 12: RMSE = 0.319954, Valid points = 5580
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 133.803µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 14 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 89.68µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 388.943µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 13: RMSE = 0.318989, Valid points = 5582
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 117.652µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 15 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 90.912µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 391.169µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 14: RMSE = 0.318473, Valid points = 5582
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 116.67µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 16 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 96.422µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 388.503µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 15: RMSE = 0.226591, Valid points = 4939
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 116.981µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 17 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 89.549µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 394.526µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 16: RMSE = 0.225492, Valid points = 4930
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 117.673µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 18 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 90.361µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 387.842µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 17: RMSE = 0.224688, Valid points = 4921
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 119.996µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 19 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 88.456µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 385.869µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 18: RMSE = 0.224061, Valid points = 4919
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 127.832µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] --- ICP Iteration 20 ---
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 100.5µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 390.328µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Iter 19: RMSE = 0.223801, Valid points = 4917
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 123.143µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Final transformation matrix:
+    [[0.74946827, 0.65951777, 0.05773792, 11.195037],
+     [-0.6619789, 0.74773186, 0.051781524, 7.227503],
+     [-0.009021633, -0.07702989, 0.99698794, -0.11234414],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-03T07:00:44Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 91.382µs
+[2026-03-03T07:00:44Z DEBUG registration_vulkan] Saving aligned source and target point cloud to: data/output/debug/aligned-source-and-target_iter-20.pcd
