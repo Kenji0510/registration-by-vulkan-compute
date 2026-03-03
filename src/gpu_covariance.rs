@@ -93,7 +93,6 @@ impl CovarianceGpuContext {
     pub fn compute_covariances(
         &mut self,
         voxel_gpu_context: &VoxelGpuContext,
-        pts: &[[f32; 3]],
         num_pts: usize,
         only_compute_covs: bool,
     ) -> Result<Vec<[f32; 9]>> {

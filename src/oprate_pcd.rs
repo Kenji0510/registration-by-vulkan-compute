@@ -208,3 +208,48 @@ pub fn convert_vecf32_to_pcd_xyz_covs(points: &[[f32; 3]], covs: &[[f32; 9]]) ->
         })
         .collect()
 }
+
+pub fn convert_pcd_xyz_to_xyz_color(points: &[PointXYZ], color: (u8, u8, u8)) -> Vec<PointXYZRGB> {
+    points
+        .iter()
+        .map(|p| PointXYZRGB {
+            x: p.x,
+            y: p.y,
+            z: p.z,
+            rgb: rgb_to_float(color.0, color.1, color.2),
+        })
+        .collect()
+}
+
+pub fn rgb_to_float(r: u8, g: u8, b: u8) -> f32 {
+    let rgb_int: u32 = ((r as u32) << 16) | ((g as u32) << 8) | (b as u32);
+    f32::from_bits(rgb_int)
+}
+
+pub fn save_pcd_with_color(points: &[PointXYZRGB], file_path: &str) -> Result<()> {
+    let colored_points: Vec<PointXYZRGB> = points
+        .iter()
+        .map(|p| PointXYZRGB {
+            x: p.x,
+            y: p.y,
+            z: p.z,
+            rgb: p.rgb,
+        })
+        .collect();
+
+    let mut writer = pcd_rs::WriterInit {
+        width: 1,
+        height: colored_points.len() as u64,
+        viewpoint: Default::default(),
+        data_kind: pcd_rs::DataKind::Ascii,
+        schema: None,
+    }
+    .create(file_path)?;
+
+    for point in &colored_points {
+        writer.push(point)?;
+    }
+    writer.finish()?;
+
+    Ok(())
+}
