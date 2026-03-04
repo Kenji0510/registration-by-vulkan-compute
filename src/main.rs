@@ -31,11 +31,11 @@ use registration_vulkan::{
 };
 use vulkano::instance::debug;
 
-const SOURCE_PCD_PATH: &str = "data/input/aist/vggt-sansouken-room-scale-7_5_voxel_025_xyz_only.pcd";
+const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd";
 // const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
-const TARGET_PCD_PATH: &str = "data/input/aist/aist-voxelized-025.pcd";
+const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
 
-const VOXEL_SIZE: f32 = 0.5;
+const VOXEL_SIZE: f32 = 0.25;
 const MAX_DIST_SQ: f32 = 10.0;
 const MIN_RMSE: f32 = VOXEL_SIZE * 0.5;
 const MAX_ITERATIONS: usize = 40;

@@ -495,3 +495,166 @@
      [0.27979264, 0.8803269, 0.38306692, 5.5226526],
      [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
 ```
+
+
+# RTX 3050
+## AIST
+```bash
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] --- ICP Iteration 36 ---
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 37.837µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 119.175µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] Iter 35: RMSE = 0.336783, Valid points = 1527
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 74.683µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] --- ICP Iteration 37 ---
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 35.749µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 118.602µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] Iter 36: RMSE = 0.336800, Valid points = 1527
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 69.279µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] --- ICP Iteration 38 ---
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 33.651µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 120.244µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] Iter 37: RMSE = 0.336801, Valid points = 1527
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 68.826µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] --- ICP Iteration 39 ---
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 33.687µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 119.666µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] Iter 38: RMSE = 0.336809, Valid points = 1527
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 68.547µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] --- ICP Iteration 40 ---
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 34.814µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 117.073µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::registration] Iter 39: RMSE = 0.336810, Valid points = 1527
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 68.756µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan] Final transformation matrix:
+    [[0.7775821, 0.026609126, -0.62821835, -0.22230706],
+     [-0.5633374, 0.4733007, -0.677228, 3.718521],
+     [0.2793158, 0.8804989, 0.38301995, 5.5262036],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:45:26Z DEBUG registration_vulkan] Final RMSE: 0.33680972
+[2026-03-04T05:45:26Z INFO  registration_vulkan] Total registration time: 297.49ms
+[2026-03-04T05:45:26Z INFO  registration_vulkan] === Registration Results ===
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 33.299µs
+[2026-03-04T05:45:26Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Original_iter-40.pcd
+Error: Failed to save results
+
+Caused by:
+    0: Failed to save aligned source and target point cloud
+    1: No such file or directory (os error 2)
+```
+
+# M4 pro (on Mac OS)
+```bash
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] --- ICP Iteration 36 ---
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 116.167µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 560.125µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] Iter 35: RMSE = 0.336783, Valid points = 1527
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 237.917µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] --- ICP Iteration 37 ---
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 114.75µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 514.959µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] Iter 36: RMSE = 0.336800, Valid points = 1527
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 228.167µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] --- ICP Iteration 38 ---
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 107.042µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 509.916µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] Iter 37: RMSE = 0.336800, Valid points = 1527
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 235.875µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] --- ICP Iteration 39 ---
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 110.209µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 510.375µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] Iter 38: RMSE = 0.336809, Valid points = 1527
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 229.542µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] --- ICP Iteration 40 ---
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 132.709µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 514.791µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::registration] Iter 39: RMSE = 0.336810, Valid points = 1527
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 220.417µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan] Final transformation matrix:
+    [[0.7775822, 0.026609087, -0.6282183, -0.22230737],
+     [-0.56333745, 0.47330076, -0.6772282, 3.7185216],
+     [0.2793158, 0.8804989, 0.38301995, 5.5262036],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:48:58Z DEBUG registration_vulkan] Final RMSE: 0.33680975
+[2026-03-04T05:48:58Z INFO  registration_vulkan] Total registration time: 577.81ms
+[2026-03-04T05:48:58Z INFO  registration_vulkan] === Registration Results ===
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 165.125µs
+[2026-03-04T05:48:58Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Original_iter-40.pcd
+```
+
+# M4 pro (on Fedora VM)
+```bash
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] Iter 35: RMSE = 0.409232, Valid points = 1765
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 294.416µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] --- ICP Iteration 37 ---
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 295.625µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 293.166µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] Iter 36: RMSE = 0.409136, Valid points = 1765
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 309.417µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] --- ICP Iteration 38 ---
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 292.333µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 297.083µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] Iter 37: RMSE = 0.409100, Valid points = 1765
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 308.5µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] --- ICP Iteration 39 ---
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 283.166µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 294.708µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] Iter 38: RMSE = 0.409043, Valid points = 1765
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 305.999µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] --- ICP Iteration 40 ---
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 319.583µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 292.458µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::registration] Iter 39: RMSE = 0.408998, Valid points = 1765
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 346.75µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan] Final transformation matrix:
+    [[0.7345347, 0.6753642, 0.06589618, 11.236622],
+     [-0.6785063, 0.7323368, 0.057552163, 7.133637],
+     [-0.009389549, -0.086985044, 0.99616534, -0.20288628],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T06:02:31Z DEBUG registration_vulkan] Final RMSE: 0.4089983
+[2026-03-04T06:02:31Z INFO  registration_vulkan] Total registration time: 584.01ms
+[2026-03-04T06:02:31Z INFO  registration_vulkan] === Registration Results ===
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 295.375µs
+[2026-03-04T06:02:31Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_90_Z_iter-40.pcd
+Error: Failed to save results
+```
+
+# Radeon 780m
+```bash
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] --- ICP Iteration 36 ---
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 51.086µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 275.228µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] Iter 35: RMSE = 0.409232, Valid points = 1765
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 134.604µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] --- ICP Iteration 37 ---
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 48.291µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 271.691µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] Iter 36: RMSE = 0.409136, Valid points = 1765
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 133.912µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] --- ICP Iteration 38 ---
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 74.621µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 274.235µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] Iter 37: RMSE = 0.409100, Valid points = 1765
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 131.507µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] --- ICP Iteration 39 ---
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 47.39µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 272.102µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] Iter 38: RMSE = 0.409043, Valid points = 1765
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 132.569µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] --- ICP Iteration 40 ---
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 46.026µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 271.741µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::registration] Iter 39: RMSE = 0.408998, Valid points = 1765
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 138.03µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan] Final transformation matrix:
+    [[0.73453456, 0.67536414, 0.06589619, 11.236621],
+     [-0.6785063, 0.7323368, 0.057552166, 7.133637],
+     [-0.009389553, -0.08698503, 0.9961652, -0.20288628],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T06:16:09Z DEBUG registration_vulkan] Final RMSE: 0.40899828
+[2026-03-04T06:16:09Z INFO  registration_vulkan] Total registration time: 442.70ms
+[2026-03-04T06:16:09Z INFO  registration_vulkan] === Registration Results ===
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 52.529µs
+[2026-03-04T06:16:09Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_90_Z_iter-40.pcd
+Error: Failed to save results
+
+```
