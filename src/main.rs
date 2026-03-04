@@ -39,7 +39,7 @@ const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
 const VOXEL_SIZE: f32 = 0.25;
 const MAX_DIST_SQ: f32 = 10.0;
 const MIN_RMSE: f32 = VOXEL_SIZE * 0.5;
-const MAX_ITERATIONS: usize = 40;
+const MAX_ITERATIONS: usize = 20;
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
@@ -185,15 +185,17 @@ fn main() -> Result<()> {
 
         info!("Saved results for transformation: {}", label);
         info!("Final RMSE for transformation {}: {}", label, rmse);
+        info!("ICP transformation matrix for {}:\n{:?}", label, icp_matrix);
     }
     info!("=== Registration Results ===");
 
     let best_registration = registration_results
         .iter()
         .min_by(|a, b| a.2.partial_cmp(&b.2).unwrap_or(std::cmp::Ordering::Equal));
-    if let Some((best_label, _, best_rmse)) = best_registration {
+    if let Some((best_label, best_icp_matrix, best_rmse)) = best_registration {
         info!("Best registration result: {}", best_label);
         info!("Best RMSE: {}", best_rmse);
+        info!("Best ICP transformation matrix:\n{:?}", best_icp_matrix);
     } else {
         info!("No valid registration results found.");
     }

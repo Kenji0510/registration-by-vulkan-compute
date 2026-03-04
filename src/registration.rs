@@ -157,7 +157,7 @@ pub fn registration_icp(
         //     voxel_size * 2.0
         // };
         // let current_max_dist_sq = current_max_dist * current_max_dist;
-        let current_max_dist_sq = 10.0;
+        let current_max_dist_sq = 5.0;
 
         let transform_params_source = TransformParams {
             r00: current_transform[[0, 0]],
