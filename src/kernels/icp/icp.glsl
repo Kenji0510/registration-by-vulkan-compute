@@ -1,7 +1,7 @@
 #version 450
 
 const uint BLOCK_SIZE = 64;
-layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+layout(local_size_x = BLOCK_SIZE, local_size_y = 1, local_size_z = 1) in;
 
 layout(push_constant) uniform IcpParams {
     int num_source;

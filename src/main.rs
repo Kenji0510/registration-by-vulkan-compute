@@ -36,10 +36,10 @@ const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_on
 // const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
 const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
 
-const VOXEL_SIZE: f32 = 0.25;
+const VOXEL_SIZE: f32 = 0.5;
 const MAX_DIST_SQ: f32 = 10.0;
 const MIN_RMSE: f32 = VOXEL_SIZE * 0.5;
-const MAX_ITERATIONS: usize = 20;
+const MAX_ITERATIONS: usize = 40;
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
