@@ -45,12 +45,12 @@ pub struct TransformGpuContext {
     descriptor_set_layout_transform: Arc<DescriptorSetLayout>,
 
     pub d_buf_input_pts: Option<Subbuffer<[f32]>>,
-    // pub d_buf_input_covs: Option<Subbuffer<[f32]>>,
+    pub d_buf_input_covs: Option<Subbuffer<[f32]>>,
     pub d_buf_output_pts: Option<Subbuffer<[f32]>>,
-    // pub d_buf_output_covs: Option<Subbuffer<[f32]>>,
+    pub d_buf_output_covs: Option<Subbuffer<[f32]>>,
 
     pub staging_buf_output_pts: Option<Subbuffer<[f32]>>,
-    // pub staging_buf_output_covs: Option<Subbuffer<[f32]>>,
+    pub staging_buf_output_covs: Option<Subbuffer<[f32]>>,
     pub current_capacity_pts: usize,
 
     pub num_points: usize,
@@ -104,11 +104,11 @@ impl TransformGpuContext {
             pipeline_layout_transform: pipeline_layout_transform.clone(),
             descriptor_set_layout_transform: descriptor_set_layout_transform.clone(),
             d_buf_input_pts: None,
-            // d_buf_input_covs: None,
+            d_buf_input_covs: None,
             d_buf_output_pts: None,
-            // d_buf_output_covs: None,
+            d_buf_output_covs: None,
             staging_buf_output_pts: None,
-            // staging_buf_output_covs: None,
+            staging_buf_output_covs: None,
             current_capacity_pts: 0,
             num_points: 0,
             table_size: 0,
@@ -153,18 +153,18 @@ impl TransformGpuContext {
                 (new_capacity * 3) as u64,
             )?);
 
-            // self.d_buf_output_covs = Some(Buffer::new_slice::<f32>(
-            //     memory_allocator.clone(),
-            //     BufferCreateInfo {
-            //         usage: BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_SRC,
-            //         ..Default::default()
-            //     },
-            //     AllocationCreateInfo {
-            //         memory_type_filter: MemoryTypeFilter::PREFER_DEVICE,
-            //         ..Default::default()
-            //     },
-            //     (new_capacity * 9) as u64,
-            // )?);
+            self.d_buf_output_covs = Some(Buffer::new_slice::<f32>(
+                memory_allocator.clone(),
+                BufferCreateInfo {
+                    usage: BufferUsage::STORAGE_BUFFER | BufferUsage::TRANSFER_SRC,
+                    ..Default::default()
+                },
+                AllocationCreateInfo {
+                    memory_type_filter: MemoryTypeFilter::PREFER_DEVICE,
+                    ..Default::default()
+                },
+                (new_capacity * 9) as u64,
+            )?);
 
             self.staging_buf_output_pts = Some(Buffer::new_slice::<f32>(
                 memory_allocator.clone(),
@@ -180,19 +180,19 @@ impl TransformGpuContext {
                 (new_capacity * 3) as u64,
             )?);
 
-            // self.staging_buf_output_covs = Some(Buffer::new_slice::<f32>(
-            //     memory_allocator.clone(),
-            //     BufferCreateInfo {
-            //         usage: BufferUsage::TRANSFER_DST,
-            //         ..Default::default()
-            //     },
-            //     AllocationCreateInfo {
-            //         memory_type_filter: MemoryTypeFilter::PREFER_HOST
-            //             | MemoryTypeFilter::HOST_RANDOM_ACCESS,
-            //         ..Default::default()
-            //     },
-            //     (new_capacity * 9) as u64,
-            // )?);
+            self.staging_buf_output_covs = Some(Buffer::new_slice::<f32>(
+                memory_allocator.clone(),
+                BufferCreateInfo {
+                    usage: BufferUsage::TRANSFER_DST,
+                    ..Default::default()
+                },
+                AllocationCreateInfo {
+                    memory_type_filter: MemoryTypeFilter::PREFER_HOST
+                        | MemoryTypeFilter::HOST_RANDOM_ACCESS,
+                    ..Default::default()
+                },
+                (new_capacity * 9) as u64,
+            )?);
         }
 
         let descriptor_set = DescriptorSet::new(
@@ -207,28 +207,28 @@ impl TransformGpuContext {
                         .context("Failed to get output points buffer")?
                         .clone(),
                 ),
-                // vulkano::descriptor_set::WriteDescriptorSet::buffer(
-                //     1,
-                //     cov_gpu_context
-                //         .d_buf_output_covs
-                //         .as_ref()
-                //         .context("Failed to get output covariance buffer")?
-                //         .clone(),
-                // ),
                 vulkano::descriptor_set::WriteDescriptorSet::buffer(
                     1,
+                    cov_gpu_context
+                        .d_buf_output_covs
+                        .as_ref()
+                        .context("Failed to get output covariance buffer")?
+                        .clone(),
+                ),
+                vulkano::descriptor_set::WriteDescriptorSet::buffer(
+                    2,
                     self.d_buf_output_pts
                         .as_ref()
                         .context("Failed to get output points buffer")?
                         .clone(),
                 ),
-                // vulkano::descriptor_set::WriteDescriptorSet::buffer(
-                //     3,
-                //     self.d_buf_output_covs
-                //         .as_ref()
-                //         .context("Failed to get output covariance buffer")?
-                //         .clone(),
-                // ),
+                vulkano::descriptor_set::WriteDescriptorSet::buffer(
+                    3,
+                    self.d_buf_output_covs
+                        .as_ref()
+                        .context("Failed to get output covariance buffer")?
+                        .clone(),
+                ),
             ],
             [],
         )
@@ -285,41 +285,41 @@ impl TransformGpuContext {
         }
 
         // <!--- DEBUG --->
-        // let copy_output_pts_src = self
-        //     .d_buf_output_pts
-        //     .as_ref()
-        //     .context("Failed to get output points buffer for copy")?
-        //     .clone()
-        //     .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 3) as u64);
-        // let copy_output_pts_dst = self
-        //     .staging_buf_output_pts
-        //     .as_ref()
-        //     .context("Failed to get staging output points buffer")?
-        //     .clone()
-        //     .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 3) as u64);
+        let copy_output_pts_src = self
+            .d_buf_output_pts
+            .as_ref()
+            .context("Failed to get output points buffer for copy")?
+            .clone()
+            .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 3) as u64);
+        let copy_output_pts_dst = self
+            .staging_buf_output_pts
+            .as_ref()
+            .context("Failed to get staging output points buffer")?
+            .clone()
+            .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 3) as u64);
 
-        // command_buffer_builder.copy_buffer(CopyBufferInfo::buffers(
-        //     copy_output_pts_src,
-        //     copy_output_pts_dst,
-        // ))?;
+        command_buffer_builder.copy_buffer(CopyBufferInfo::buffers(
+            copy_output_pts_src,
+            copy_output_pts_dst,
+        ))?;
 
-        // let copy_output_covs_src = self
-        //     .d_buf_output_covs
-        //     .as_ref()
-        //     .context("Failed to get output covariances buffer for copy")?
-        //     .clone()
-        //     .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 9) as u64);
-        // let copy_output_covs_dst = self
-        //     .staging_buf_output_covs
-        //     .as_ref()
-        //     .context("Failed to get staging output covariances buffer")?
-        //     .clone()
-        //     .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 9) as u64);
+        let copy_output_covs_src = self
+            .d_buf_output_covs
+            .as_ref()
+            .context("Failed to get output covariances buffer for copy")?
+            .clone()
+            .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 9) as u64);
+        let copy_output_covs_dst = self
+            .staging_buf_output_covs
+            .as_ref()
+            .context("Failed to get staging output covariances buffer")?
+            .clone()
+            .slice(0..(voxel_gpu_context.h_downsampled_pts_num * 9) as u64);
 
-        // command_buffer_builder.copy_buffer(CopyBufferInfo::buffers(
-        //     copy_output_covs_src,
-        //     copy_output_covs_dst,
-        // ))?;
+        command_buffer_builder.copy_buffer(CopyBufferInfo::buffers(
+            copy_output_covs_src,
+            copy_output_covs_dst,
+        ))?;
         // <!--- DEBUG --->
 
         let command_buffer = command_buffer_builder.build()?;

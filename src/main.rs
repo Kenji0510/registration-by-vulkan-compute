@@ -173,6 +173,7 @@ fn main() -> Result<()> {
         };
 
         save_results(
+            &vulkan_context,
             &mut gpu_contexts,
             &final_transform_params,
             &source_pcd,

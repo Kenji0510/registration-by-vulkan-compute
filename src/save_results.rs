@@ -3,16 +3,14 @@ use log::debug;
 use ndarray::Array2;
 
 use crate::{
-    gpu_copy::copy_d_to_h,
-    gpu_transform::TransformParams,
-    oprate_pcd::{
+    gpu_copy::copy_d_to_h, gpu_transform::TransformParams, init_gpu::VulkanContext, oprate_pcd::{
         PointXYZ, convert_pcd_xyz_to_xyz_color, convert_vecf32_to_pcd_xyz, save_pcd_with_color,
         save_xyz_pcd,
-    },
-    registration::GpuContexts,
+    }, registration::GpuContexts
 };
 
 pub fn save_results(
+    vulkan_context: &VulkanContext,
     gpu_contexts: &mut GpuContexts,
     transform_params: &TransformParams,
     source_pcd: &Vec<PointXYZ>,
@@ -31,13 +29,13 @@ pub fn save_results(
         .context("Failed to apply final transformation to source points using GPU")?;
 
     let transformed_source_pts = copy_d_to_h(
+        &vulkan_context,
         &gpu_contexts.voxel_gpu_ctx_source,
         &gpu_contexts.transform_gpu_ctx_source,
     )
     .context("Failed to copy transformed source points from GPU to CPU")?;
 
     let transformed_source_pts_vecf32: Vec<[f32; 3]> = transformed_source_pts
-        .0
         .iter()
         .map(|p| [p[0], p[1], p[2]])
         .collect();
