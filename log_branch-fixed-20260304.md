@@ -164,5 +164,334 @@
 
 ### Rentallab
 ```bash
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] --- ICP Iteration 35 ---
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 40.156µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 80.632µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] Iter 34: RMSE = 0.362233, Valid points = 882
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 67.948µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] --- ICP Iteration 36 ---
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 41.759µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 84.499µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] Iter 35: RMSE = 0.362233, Valid points = 882
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 69.801µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] --- ICP Iteration 37 ---
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 43.342µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 82.013µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] Iter 36: RMSE = 0.362233, Valid points = 882
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 70.763µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] --- ICP Iteration 38 ---
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 45.596µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 83.066µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] Iter 37: RMSE = 0.362232, Valid points = 882
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 68.959µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] --- ICP Iteration 39 ---
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 43.813µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 84.378µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] Iter 38: RMSE = 0.362233, Valid points = 882
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 71.664µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] --- ICP Iteration 40 ---
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 45.056µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 82.596µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::registration] Iter 39: RMSE = 0.362232, Valid points = 882
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 69.581µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan] Final transformation matrix:
+    [[-0.23554933, 0.7947544, -0.5593589, 3.486178],
+     [-0.96203727, -0.27231014, 0.018212948, -0.441025],
+     [-0.13784423, 0.5424142, 0.82872564, 2.0598104],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan] Final RMSE: 0.36223245
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Total registration time: 224.98ms
+[2026-03-04T05:37:38Z INFO  registration_vulkan] === Registration Results ===
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 45.806µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_180_Z_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_180_Z
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_180_Z: 0.23731095
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_180_Z:
+    [[-0.8999838, -0.26830843, -0.34356844, -1.738331],
+     [0.24782959, -0.9633028, 0.10309325, -1.828406],
+     [-0.35862124, 0.0076358505, 0.93345195, -0.3389655],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 60.525µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_180_X_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_180_X
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_180_X: 0.3125789
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_180_X:
+    [[0.7673601, 0.53573537, 0.3523444, 2.5526123],
+     [0.49865314, -0.84403723, 0.19734678, -1.1814896],
+     [0.40311712, 0.02426159, -0.91482663, 2.7444613],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 111.881µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_-90_X_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_-90_X
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_-90_X: 0.31257892
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_-90_X:
+    [[0.7673601, 0.5357353, 0.35234413, 2.552612],
+     [0.4986533, -0.8440374, 0.19734664, -1.18149],
+     [0.40311715, 0.024261644, -0.9148264, 2.7444615],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 56.106µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_LR_Flip_Reverse-Y_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: LR_Flip_Reverse-Y
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation LR_Flip_Reverse-Y: 0.31811878
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for LR_Flip_Reverse-Y:
+    [[0.77878356, 0.37799215, -0.50061744, 2.945054],
+     [0.51026213, -0.84592247, 0.15507242, -1.1272672],
+     [0.36486736, 0.37621439, 0.851666, 1.9020145],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 49.954µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_UD_Flip_Reverse-Z_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: UD_Flip_Reverse-Z
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation UD_Flip_Reverse-Z: 0.32499442
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for UD_Flip_Reverse-Z:
+    [[0.88225025, 0.2559026, 0.39515594, 1.4668307],
+     [-0.21404278, 0.9656303, -0.14745586, 5.620389],
+     [0.419309, -0.04551266, -0.9067022, 2.4685512],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 51.187µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_90_Y_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_90_Y
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_90_Y: 0.33074072
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_90_Y:
+    [[-0.7510642, -0.3695085, 0.5471429, -3.0194914],
+     [-0.5132707, 0.8480379, -0.13185292, 4.74121],
+     [-0.41527712, -0.37986282, -0.8265885, 0.0987267],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 47.1µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_180_Y_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_180_Y
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_180_Y: 0.33634347
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_180_Y:
+    [[-0.7686788, -0.38715857, 0.50915676, -3.0324848],
+     [-0.53550225, 0.8248573, -0.18123825, 4.7712083],
+     [-0.34981367, -0.41196877, -0.8413753, 0.060688186],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 51.246µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Front-Back_Flip_Reverse-X_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Front-Back_Flip_Reverse-X
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Front-Back_Flip_Reverse-X: 0.34857926
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Front-Back_Flip_Reverse-X:
+    [[-0.79966414, -0.49740866, -0.33633718, -2.3891535],
+     [-0.4568223, 0.8675086, -0.19683151, 4.8725452],
+     [-0.38968062, 0.0037528034, 0.9209421, -0.449092],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 51.196µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_90_Z_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_90_Z
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_90_Z: 0.35715428
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_90_Z:
+    [[0.16814664, -0.9581559, -0.23165418, -3.2827554],
+     [0.97844636, 0.19080214, -0.07897892, 3.6927407],
+     [0.119874194, -0.21338113, 0.96958673, -0.8162627],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 48.433µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Original_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Original
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Original: 0.3613042
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Original:
+    [[0.9024485, 0.05881896, -0.42676416, 1.6890552],
+     [-0.1768169, 0.95392054, -0.24242757, 5.644493],
+     [0.3928399, 0.2942374, 0.8712641, 1.6065733],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 51.468µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_-90_Y_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_-90_Y
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_-90_Y: 0.3614394
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_-90_Y:
+    [[0.89133114, 0.07631361, -0.44688365, 1.7840372],
+     [-0.1972368, 0.95282865, -0.2306853, 5.5992966],
+     [0.40819907, 0.29375896, 0.8643373, 1.6342697],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 50.786µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_-90_Z_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_-90_Z
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_-90_Z: 0.36223245
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_-90_Z:
+    [[-0.23554933, 0.7947544, -0.5593589, 3.486178],
+     [-0.96203727, -0.27231014, 0.018212948, -0.441025],
+     [-0.13784423, 0.5424142, 0.82872564, 2.0598104],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 47.66µs
+[2026-03-04T05:37:38Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_90_X_iter-40.pcd
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Saved results for transformation: Rot_90_X
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Final RMSE for transformation Rot_90_X: 0.36358622
+[2026-03-04T05:37:38Z INFO  registration_vulkan] ICP transformation matrix for Rot_90_X:
+    [[0.877069, 0.11888618, -0.4654206, 2.0010912],
+     [-0.25552303, 0.9359072, -0.24245772, 5.4940605],
+     [0.40676582, 0.33157784, 0.85123295, 1.7993176],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:37:38Z INFO  registration_vulkan] === Registration Results ===
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Best registration result: Rot_180_Z
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Best RMSE: 0.23731095
+[2026-03-04T05:37:38Z INFO  registration_vulkan] Best ICP transformation matrix:
+    [[-0.8999838, -0.26830843, -0.34356844, -1.738331],
+     [0.24782959, -0.9633028, 0.10309325, -1.828406],
+     [-0.35862124, 0.0076358505, 0.93345195, -0.3389655],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+```
 
+### AIST
+```bash
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] --- ICP Iteration 35 ---
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 36.509µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 85.572µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] Iter 34: RMSE = 0.336768, Valid points = 1527
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 65.043µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] --- ICP Iteration 36 ---
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 36.509µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 85.822µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] Iter 35: RMSE = 0.336783, Valid points = 1527
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 64.683µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] --- ICP Iteration 37 ---
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 36.639µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 86.023µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] Iter 36: RMSE = 0.336800, Valid points = 1527
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 64.863µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] --- ICP Iteration 38 ---
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 37.07µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 85.572µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] Iter 37: RMSE = 0.336801, Valid points = 1527
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 66.325µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] --- ICP Iteration 39 ---
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 37.131µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 85.491µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] Iter 38: RMSE = 0.336809, Valid points = 1527
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 65.734µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] --- ICP Iteration 40 ---
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 37.672µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_search_neighbor] Compute neighbor search shader execution time: 85.972µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::registration] Iter 39: RMSE = 0.336810, Valid points = 1527
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_icp] Compute icp shader execution time: 65.643µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan] Final transformation matrix:
+    [[0.7775821, 0.026609141, -0.6282181, -0.22230698],
+     [-0.5633373, 0.47330073, -0.67722803, 3.7185214],
+     [0.27931577, 0.8804989, 0.38301995, 5.5262036],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan] Final RMSE: 0.33680964
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Total registration time: 265.77ms
+[2026-03-04T05:40:35Z INFO  registration_vulkan] === Registration Results ===
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 37.612µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Original_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Original
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Original: 0.33675376
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Original:
+    [[0.7773476, 0.026430305, -0.6285156, -0.224589],
+     [-0.56342405, 0.4736301, -0.6769254, 3.7207181],
+     [0.27979264, 0.8803269, 0.38306692, 5.5226526],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 53.45µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_90_X_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_90_X
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_90_X: 0.33675945
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_90_X:
+    [[0.777505, 0.026528053, -0.6283168, -0.22465128],
+     [-0.56341994, 0.47321475, -0.6772194, 3.7183673],
+     [0.27936342, 0.8805474, 0.3828733, 5.525546],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 53.371µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_-90_Z_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_-90_Z
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_-90_Z: 0.33680964
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_-90_Z:
+    [[0.7775821, 0.026609141, -0.6282181, -0.22230698],
+     [-0.5633373, 0.47330073, -0.67722803, 3.7185214],
+     [0.27931577, 0.8804989, 0.38301995, 5.5262036],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 56.517µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_UD_Flip_Reverse-Z_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: UD_Flip_Reverse-Z
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation UD_Flip_Reverse-Z: 0.38973275
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for UD_Flip_Reverse-Z:
+    [[0.73215544, 0.17506006, 0.65825707, 0.30664286],
+     [-0.61530185, 0.5844927, 0.5289348, 4.0721045],
+     [0.29215115, 0.7922891, -0.5356542, 5.140943],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 56.798µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_90_Z_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_90_Z
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_90_Z: 0.4233405
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_90_Z:
+    [[-0.73568475, -0.1761905, -0.6540066, -0.96482044],
+     [0.6258629, -0.54600626, -0.556931, -2.5178733],
+     [-0.2589657, -0.8190447, 0.51195985, -4.398041],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 49.824µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_180_Z_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_180_Z
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_180_Z: 0.42348474
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_180_Z:
+    [[-0.7380315, -0.17453468, -0.65180236, -0.96651936],
+     [0.62300116, -0.5472983, -0.5588685, -2.5255637],
+     [-0.2591885, -0.81853664, 0.5126587, -4.3990507],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 51.326µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Front-Back_Flip_Reverse-X_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Front-Back_Flip_Reverse-X
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Front-Back_Flip_Reverse-X: 0.4455383
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Front-Back_Flip_Reverse-X:
+    [[0.40538135, -0.67656314, -0.6147584, -4.077231],
+     [-0.7943903, 0.07204469, -0.60312045, 1.2587218],
+     [-0.4523391, -0.73285186, 0.50824964, -3.910016],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 45.276µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_-90_X_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_-90_X
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_-90_X: 0.4467503
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_-90_X:
+    [[0.45730302, -0.559678, 0.6911106, -4.0194283],
+     [-0.8288962, 0.013298456, 0.5592441, 0.78063667],
+     [-0.32218745, -0.8286032, -0.45783362, -4.2441993],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 49.122µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_90_Y_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_90_Y
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_90_Y: 0.45116964
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_90_Y:
+    [[0.4366694, -0.57110226, 0.69509816, -4.011809],
+     [-0.8268294, 0.04969483, 0.5602539, 0.95498776],
+     [-0.35450524, -0.81937313, -0.45050415, -4.1351066],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 63.992µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_180_X_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_180_X
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_180_X: 0.45659298
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_180_X:
+    [[-0.28653082, 0.7445088, 0.6029977, 4.0924087],
+     [0.75884247, -0.2078526, 0.617216, -1.1719576],
+     [0.58485734, 0.63443184, -0.5054088, 4.1096473],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 67.647µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_180_Y_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_180_Y
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_180_Y: 0.53427434
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_180_Y:
+    [[0.16006136, -0.65540206, 0.73812497, -4.075901],
+     [-0.79448557, 0.35823324, 0.4903687, 2.4287524],
+     [-0.58580977, -0.6649186, -0.46336806, -2.9182823],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 66.054µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_Rot_-90_Y_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: Rot_-90_Y
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation Rot_-90_Y: 0.62226653
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for Rot_-90_Y:
+    [[0.61582136, -0.5203553, -0.5916026, -3.0780046],
+     [-0.03265871, 0.73336965, -0.67904544, 4.3917007],
+     [0.7872085, 0.43749166, 0.43463063, 2.3544586],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::gpu_transform] Compute transform shader execution time: 56.106µs
+[2026-03-04T05:40:35Z DEBUG registration_vulkan::save_results] Saving aligned source and target point cloud to: data/output/debug/integrate-reverse-pattern/aligned-source-and-target_LR_Flip_Reverse-Y_iter-40.pcd
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Saved results for transformation: LR_Flip_Reverse-Y
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Final RMSE for transformation LR_Flip_Reverse-Y: 0.75048906
+[2026-03-04T05:40:35Z INFO  registration_vulkan] ICP transformation matrix for LR_Flip_Reverse-Y:
+    [[0.53584087, 0.39723676, -0.7450351, 2.9998033],
+     [0.03930968, -0.8931901, -0.44795743, -4.4698277],
+     [0.8434037, -0.21074675, 0.49422303, 0.48430443],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
+[2026-03-04T05:40:35Z INFO  registration_vulkan] === Registration Results ===
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Best registration result: Original
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Best RMSE: 0.33675376
+[2026-03-04T05:40:35Z INFO  registration_vulkan] Best ICP transformation matrix:
+    [[0.7773476, 0.026430305, -0.6285156, -0.224589],
+     [-0.56342405, 0.4736301, -0.6769254, 3.7207181],
+     [0.27979264, 0.8803269, 0.38306692, 5.5226526],
+     [0.0, 0.0, 0.0, 1.0]], shape=[4, 4], strides=[4, 1], layout=Cc (0x5), const ndim=2
 ```

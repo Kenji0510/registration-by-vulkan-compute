@@ -16,8 +16,7 @@ use registration_vulkan::{
     gpu_voxel::VoxelGpuContext,
     init_gpu::VulkanContext,
     oprate_pcd::{
-        PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz,
-        save_pcd, save_pcd_with_covs, save_xyz_pcd,
+        PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, load_pcd_xyzrgb, save_pcd, save_pcd_with_covs, save_xyz_pcd
     },
     registration::{GpuContexts, calculate_target_center, mat4_mul, registration_icp},
     reverse_pattern::{
@@ -32,9 +31,9 @@ use registration_vulkan::{
 };
 use vulkano::instance::debug;
 
-const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd";
+const SOURCE_PCD_PATH: &str = "data/input/aist/vggt-sansouken-room-scale-7_5_voxel_025_xyz_only.pcd";
 // const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
-const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
+const TARGET_PCD_PATH: &str = "data/input/aist/aist-voxelized-025.pcd";
 
 const VOXEL_SIZE: f32 = 0.5;
 const MAX_DIST_SQ: f32 = 10.0;
@@ -78,6 +77,7 @@ fn main() -> Result<()> {
 
     let source_pcd = load_pcd_xyz(SOURCE_PCD_PATH).context("Failed to load the source pcd")?;
     let target_pcd = load_pcd_xyz(TARGET_PCD_PATH).context("Failed to load the target pcd")?;
+    // let target_pcd = load_pcd_xyzrgb(TARGET_PCD_PATH).context("Failed to load the target pcd")?;
 
     info!("=== Parameters ===");
     info!("Source PCD path: {}", SOURCE_PCD_PATH);
