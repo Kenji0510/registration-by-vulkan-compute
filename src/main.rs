@@ -33,11 +33,11 @@ use registration_vulkan::{
 };
 use vulkano::instance::debug;
 
-const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd";
+const SOURCE_PCD_PATH: &str = "/workspace/input/vggt-source.pcd";
 // const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
-const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
+const TARGET_PCD_PATH: &str = "/workspace/input/lidar-target.pcd";
 
-const OUTPUT_DIR: &str = "data/output/debug/fixed-0309";
+const OUTPUT_DIR: &str = "/workspace/output";
 
 const VOXEL_SIZE: f32 = 0.25;
 const MAX_DIST_SQ: f32 = 10.0;
