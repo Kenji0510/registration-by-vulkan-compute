@@ -1908,6 +1908,8 @@ dependencies = [
  "plotters",
  "rayon",
  "rustc-hash",
+ "serde",
+ "serde_json",
  "vulkano 0.35.2",
  "vulkano-shaders",
 ]

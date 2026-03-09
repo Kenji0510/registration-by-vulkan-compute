@@ -6,6 +6,7 @@ use log::{debug, info};
 use ndarray::{Array1, Array2, Axis, s};
 use ndarray_linalg::Solve;
 use registration_vulkan::{
+    export_logs::{ICPStatResult, save_all_icp_stats},
     gpu_copy::copy_d_to_h,
     gpu_covariance::CovarianceGpuContext,
     gpu_icp::{IcpGpuContext, IcpStaticBuffers},
@@ -16,7 +17,8 @@ use registration_vulkan::{
     gpu_voxel::VoxelGpuContext,
     init_gpu::VulkanContext,
     oprate_pcd::{
-        PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz, load_pcd_xyzrgb, save_pcd, save_pcd_with_covs, save_xyz_pcd
+        PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz,
+        load_pcd_xyzrgb, save_pcd, save_pcd_with_covs, save_xyz_pcd,
     },
     registration::{GpuContexts, calculate_target_center, mat4_mul, registration_icp},
     reverse_pattern::{
@@ -34,6 +36,8 @@ use vulkano::instance::debug;
 const SOURCE_PCD_PATH: &str = "data/input/H927/vggt-data_output_voxel_025_xyz_only.pcd";
 // const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
 const TARGET_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd";
+
+const OUTPUT_DIR: &str = "data/output/debug/fixed-0309";
 
 const VOXEL_SIZE: f32 = 0.25;
 const MAX_DIST_SQ: f32 = 10.0;
@@ -151,10 +155,13 @@ fn main() -> Result<()> {
     let elapsed = start.elapsed();
     info!("Total registration time: {:.2?}", elapsed);
 
+    // Sort
     registration_results.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap_or(std::cmp::Ordering::Equal));
 
+    let mut icp_stat_results = Vec::new();
+
     info!("=== Registration Results ===");
-    for (label, icp_matrix, rmse) in registration_results.iter() {
+    for (index, (label, icp_matrix, rmse)) in registration_results.iter().enumerate() {
         // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
         let final_transform_params = TransformParams {
             r00: icp_matrix[[0, 0]],
@@ -172,6 +179,44 @@ fn main() -> Result<()> {
             num_points: gpu_contexts.voxel_gpu_ctx_source.h_downsampled_pts_num as u32,
         };
 
+        // Only best transformation
+        if index == 0 {
+            let best_icp_result = ICPStatResult {
+                label: label.to_string(),
+                save_pcd_path: format!(
+                    "{}/icp-aligned-by-{}_iter-{}_rmse_{:.4}.pcd",
+                    OUTPUT_DIR, label, MAX_ITERATIONS, rmse
+                ),
+                rmse: *rmse,
+                transform: icp_matrix
+                    .clone()
+                    .into_raw_vec()
+                    .chunks(4)
+                    .map(|vec| vec.to_vec())
+                    .collect(),
+            };
+
+            let save_path = format!("{}/icp-best-stat-results.json", OUTPUT_DIR);
+            save_all_icp_stats(&[best_icp_result], &save_path)
+                .context("Failed to save best ICP stats")?;
+
+            let save_path = format!("{}/icp-aligned_best-result.pcd", OUTPUT_DIR);
+            save_results(
+                &vulkan_context,
+                &mut gpu_contexts,
+                &final_transform_params,
+                &source_pcd,
+                &target_pcd,
+                MAX_ITERATIONS,
+                &save_path,
+            )
+            .context("Failed to save results")?;
+        }
+
+        let save_path = format!(
+            "{}/icp-aligned-by-{}_iter-{}_rmse_{:.4}.pcd",
+            OUTPUT_DIR, label, MAX_ITERATIONS, rmse
+        );
         save_results(
             &vulkan_context,
             &mut gpu_contexts,
@@ -179,16 +224,31 @@ fn main() -> Result<()> {
             &source_pcd,
             &target_pcd,
             MAX_ITERATIONS,
-            label,
+            &save_path,
         )
         .context("Failed to save results")?;
         // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
+
+        icp_stat_results.push(ICPStatResult {
+            label: label.to_string(),
+            save_pcd_path: save_path.clone(),
+            rmse: *rmse,
+            transform: icp_matrix
+                .clone()
+                .into_raw_vec()
+                .chunks(4)
+                .map(|vec| vec.to_vec())
+                .collect(),
+        });
 
         info!("Saved results for transformation: {}", label);
         info!("Final RMSE for transformation {}: {}", label, rmse);
         info!("ICP transformation matrix for {}:\n{:?}", label, icp_matrix);
     }
     info!("=== Registration Results ===");
+
+    let save_path = format!("{}/icp-all-stat-results.json", OUTPUT_DIR);
+    save_all_icp_stats(&icp_stat_results, &save_path).context("Failed to save all ICP stats")?;
 
     let best_registration = registration_results
         .iter()

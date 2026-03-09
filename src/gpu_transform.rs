@@ -48,7 +48,6 @@ pub struct TransformGpuContext {
     // pub d_buf_input_covs: Option<Subbuffer<[f32]>>,
     pub d_buf_output_pts: Option<Subbuffer<[f32]>>,
     // pub d_buf_output_covs: Option<Subbuffer<[f32]>>,
-
     pub staging_buf_output_pts: Option<Subbuffer<[f32]>>,
     // pub staging_buf_output_covs: Option<Subbuffer<[f32]>>,
     pub current_capacity_pts: usize,

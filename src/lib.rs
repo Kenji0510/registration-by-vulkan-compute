@@ -1,3 +1,4 @@
+pub mod export_logs;
 pub mod gpu_copy;
 pub mod gpu_covariance;
 pub mod gpu_icp;

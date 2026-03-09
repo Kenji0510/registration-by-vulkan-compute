@@ -3,10 +3,14 @@ use log::debug;
 use ndarray::Array2;
 
 use crate::{
-    gpu_copy::copy_d_to_h, gpu_transform::TransformParams, init_gpu::VulkanContext, oprate_pcd::{
+    gpu_copy::copy_d_to_h,
+    gpu_transform::TransformParams,
+    init_gpu::VulkanContext,
+    oprate_pcd::{
         PointXYZ, convert_pcd_xyz_to_xyz_color, convert_vecf32_to_pcd_xyz, save_pcd_with_color,
         save_xyz_pcd,
-    }, registration::GpuContexts
+    },
+    registration::GpuContexts,
 };
 
 pub fn save_results(
@@ -16,7 +20,7 @@ pub fn save_results(
     source_pcd: &Vec<PointXYZ>,
     target_pcd: &Vec<PointXYZ>,
     max_iterations: usize,
-    label: &str,
+    save_path: &str,
 ) -> Result<()> {
     // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
     gpu_contexts
@@ -48,15 +52,11 @@ pub fn save_results(
     let mut aligned_source_and_target = aligned_source_pcd_with_color.clone();
     aligned_source_and_target.extend_from_slice(&target_pcd_with_color);
     aligned_source_and_target.extend_from_slice(&source_pcd_with_color);
-    let aligned_save_path = format!(
-        "data/output/debug/integrate-reverse-pattern/aligned-source-and-target_{}_iter-{}.pcd",
-        label, max_iterations
-    );
     debug!(
         "Saving aligned source and target point cloud to: {}",
-        aligned_save_path
+        save_path
     );
-    save_pcd_with_color(&aligned_source_and_target, &aligned_save_path)
+    save_pcd_with_color(&aligned_source_and_target, &save_path)
         .context("Failed to save aligned source and target point cloud")?;
 
     // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->

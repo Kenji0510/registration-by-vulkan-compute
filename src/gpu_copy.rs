@@ -2,7 +2,11 @@ use anyhow::{Context, Result};
 use log::{debug, info};
 use ndarray::Array2;
 use vulkano::{
-    buffer::{Buffer, BufferCreateInfo, BufferUsage}, command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, CopyBufferInfo}, instance::debug, memory::allocator::{AllocationCreateInfo, MemoryTypeFilter}, sync::{self, GpuFuture}
+    buffer::{Buffer, BufferCreateInfo, BufferUsage},
+    command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, CopyBufferInfo},
+    instance::debug,
+    memory::allocator::{AllocationCreateInfo, MemoryTypeFilter},
+    sync::{self, GpuFuture},
 };
 
 use crate::{
@@ -15,7 +19,7 @@ pub fn copy_d_to_h(
     voxel_gpu_context: &VoxelGpuContext,
     // cov_gpu_context: &CovarianceGpuContext,
     transform_gpu_context: &TransformGpuContext,
-// ) -> Result<(Vec<[f32; 3]>, Vec<[f32; 9]>)> {
+    // ) -> Result<(Vec<[f32; 3]>, Vec<[f32; 9]>)> {
 ) -> Result<Vec<[f32; 3]>> {
     // <!--- Copy the transformed points from GPU to CPU --->
     let queue = &vulkan_context.queue;
