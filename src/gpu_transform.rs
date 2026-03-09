@@ -4,20 +4,17 @@ use anyhow::{Context, Result};
 use log::debug;
 use vulkano::{
     buffer::{Buffer, BufferCreateInfo, BufferUsage, Subbuffer},
-    command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, CopyBufferInfo},
+    command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage},
     descriptor_set::{DescriptorSet, layout::DescriptorSetLayout},
     memory::allocator::{AllocationCreateInfo, MemoryTypeFilter},
     pipeline::{
         ComputePipeline, Pipeline, PipelineLayout, PipelineShaderStageCreateInfo,
         compute::ComputePipelineCreateInfo, layout::PipelineDescriptorSetLayoutCreateInfo,
     },
-    query::{QueryPool, QueryPoolCreateInfo, QueryType},
     sync::{self, GpuFuture},
 };
 
-use crate::{
-    gpu_covariance::CovarianceGpuContext, gpu_voxel::VoxelGpuContext, init_gpu::VulkanContext,
-};
+use crate::{gpu_voxel::VoxelGpuContext, init_gpu::VulkanContext};
 
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
 #[repr(C)]
@@ -119,7 +116,7 @@ impl TransformGpuContext {
     pub fn transform(
         &mut self,
         voxel_gpu_context: &VoxelGpuContext,
-        cov_gpu_context: &CovarianceGpuContext,
+        // cov_gpu_context: &CovarianceGpuContext,
         transform_params: TransformParams,
     ) -> Result<()> {
         let device = &self.vulkan_context.device;
@@ -244,27 +241,6 @@ impl TransformGpuContext {
         let group_count_x =
             (voxel_gpu_context.h_downsampled_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
         let work_group_count = [group_count_x, 1, 1];
-
-        // Check if timestamps are supported
-        let queue_family_props = device
-            .physical_device()
-            .queue_family_properties()
-            .get(queue.queue_family_index() as usize)
-            .context("Failed to get queue family properties")?;
-        let timestamps_supported = queue_family_props
-            .timestamp_valid_bits
-            .map_or(false, |bits| bits > 0);
-
-        let query_pool = if timestamps_supported {
-            let mut create_info = QueryPoolCreateInfo::query_type(QueryType::Timestamp);
-            create_info.query_count = 6;
-            Some(
-                QueryPool::new(device.clone(), create_info)
-                    .context("Failed to create query pool")?,
-            )
-        } else {
-            None
-        };
 
         unsafe {
             command_buffer_builder

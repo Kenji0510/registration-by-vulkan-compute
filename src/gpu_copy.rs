@@ -1,17 +1,11 @@
 use anyhow::{Context, Result};
-use log::{debug, info};
-use ndarray::Array2;
 use vulkano::{
-    buffer::{Buffer, BufferCreateInfo, BufferUsage},
     command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, CopyBufferInfo},
-    instance::debug,
-    memory::allocator::{AllocationCreateInfo, MemoryTypeFilter},
     sync::{self, GpuFuture},
 };
 
 use crate::{
-    gpu_covariance::CovarianceGpuContext, gpu_transform::TransformGpuContext,
-    gpu_voxel::VoxelGpuContext, init_gpu::VulkanContext,
+    gpu_transform::TransformGpuContext, gpu_voxel::VoxelGpuContext, init_gpu::VulkanContext,
 };
 
 pub fn copy_d_to_h(
@@ -68,21 +62,6 @@ pub fn copy_d_to_h(
             chunk.try_into().context("Failed to map for output points")
         })
         .collect::<Result<Vec<_>, _>>()?;
-
-    // let out_covs_content = transform_gpu_context
-    //     .staging_buf_output_covs
-    //     .as_ref()
-    //     .context("Failed to get staging output covariances buffer")?
-    //     .read()?;
-    // let output_covs: Vec<[f32; 9]> = out_covs_content
-    //     .chunks_exact(9)
-    //     .take(voxel_gpu_context.h_downsampled_pts_num)
-    //     .map(|chunk| -> Result<[f32; 9]> {
-    //         chunk
-    //             .try_into()
-    //             .context("Failed to map for output covariances")
-    //     })
-    //     .collect::<Result<Vec<_>, _>>()?;
     // <!--- Copy the transformed points from GPU to CPU --->
 
     Ok(output_points)

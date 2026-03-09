@@ -30,31 +30,12 @@ pub struct GpuContexts<'a> {
 pub fn registration_icp(
     gpu_contexts: &mut GpuContexts,
     initial_center_transform: &Array2<f32>,
-    voxel_size: f32,
+    _voxel_size: f32,
     max_iterations: usize,
     min_rmse: f32,
 ) -> Result<(Array2<f32>, f32)> {
     let downsampled_source_pts_num = gpu_contexts.voxel_gpu_ctx_source.h_downsampled_pts_num;
     let downsampled_target_pts_num = gpu_contexts.voxel_gpu_ctx_target.h_downsampled_pts_num;
-
-    // <!--- Compute the covariance of the point clouds using GPU voxelization --->
-    let d_source_covs = gpu_contexts
-        .covariance_gpu_ctx_source
-        .compute_covariances(
-            &gpu_contexts.voxel_gpu_ctx_source,
-            downsampled_source_pts_num,
-            false,
-        )
-        .context("Failed to compute covariances for source")?;
-    let d_target_covs = gpu_contexts
-        .covariance_gpu_ctx_target
-        .compute_covariances(
-            &gpu_contexts.voxel_gpu_ctx_target,
-            downsampled_target_pts_num,
-            false,
-        )
-        .context("Failed to compute covariances for target")?;
-    // <!--- Compute the covariance of the point clouds using GPU voxelization --->
 
     // <!--- Compute the transformation of the point clouds using GPU voxelization --->
     let transform_params_source = TransformParams {
@@ -74,11 +55,7 @@ pub fn registration_icp(
     };
     gpu_contexts
         .transform_gpu_ctx_source
-        .transform(
-            &gpu_contexts.voxel_gpu_ctx_source,
-            &gpu_contexts.covariance_gpu_ctx_source,
-            transform_params_source,
-        )
+        .transform(&gpu_contexts.voxel_gpu_ctx_source, transform_params_source)
         .context("Failed to transform points and covariances for source")?;
     // <!--- Compute the transformation of the point clouds using GPU voxelization --->
 
@@ -99,7 +76,7 @@ pub fn registration_icp(
         vp_y: 0.0,
         vp_z: 0.0,
     };
-    let target_normals = gpu_contexts
+    let _target_normals = gpu_contexts
         .normals_gpu_ctx_target
         .compute_normals(
             &gpu_contexts.voxel_gpu_ctx_target,
@@ -141,7 +118,6 @@ pub fn registration_icp(
 
     let mut current_transform = initial_center_transform.clone();
     let mut rmse = 0.0f32;
-    let mut prev_rmse = f32::MAX;
 
     debug!("Starting ICP iterations...");
 
@@ -178,11 +154,7 @@ pub fn registration_icp(
         // <!--- Compute the transformation of the point clouds using GPU voxelization --->
         gpu_contexts
             .transform_gpu_ctx_source
-            .transform(
-                &gpu_contexts.voxel_gpu_ctx_source,
-                &gpu_contexts.covariance_gpu_ctx_source,
-                transform_params_source,
-            )
+            .transform(&gpu_contexts.voxel_gpu_ctx_source, transform_params_source)
             .context("Failed to transform points and covariances for source")?;
         // <!--- Compute the transformation of the point clouds using GPU voxelization --->
 
@@ -228,7 +200,6 @@ pub fn registration_icp(
             info!("Converged! (RMSE difference is less than threshold)");
             break;
         }
-        prev_rmse = rmse;
         // <!--- Check convergence (RMSE) --->
 
         // <!--- Compute ICP using GPU --->

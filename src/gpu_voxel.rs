@@ -1,20 +1,15 @@
 use anyhow::{Context, Result};
-use core::num;
 use log::debug;
 use std::{sync::Arc, time::Instant};
 use vulkano::{
     buffer::{Buffer, BufferCreateInfo, BufferUsage, Subbuffer},
     command_buffer::{AutoCommandBufferBuilder, CommandBufferUsage, CopyBufferInfo},
-    descriptor_set::{
-        DescriptorSet, WriteDescriptorSet, allocator::StandardDescriptorSetAllocator,
-        layout::DescriptorSetLayout,
-    },
+    descriptor_set::{DescriptorSet, WriteDescriptorSet, layout::DescriptorSetLayout},
     memory::allocator::{AllocationCreateInfo, MemoryTypeFilter},
     pipeline::{
         ComputePipeline, Pipeline, PipelineLayout, PipelineShaderStageCreateInfo,
         compute::ComputePipelineCreateInfo, layout::PipelineDescriptorSetLayoutCreateInfo,
     },
-    query::{QueryPool, QueryPoolCreateInfo, QueryType},
     sync::{self, GpuFuture},
 };
 
@@ -42,7 +37,7 @@ pub struct VoxelGpuContext {
     descriptor_set_layout_insert: Arc<DescriptorSetLayout>,
     descriptor_set_layout_compact: Arc<DescriptorSetLayout>,
 
-    staging_h_buf_input_pts: Option<Subbuffer<[f32]>>,
+    // staging_h_buf_input_pts: Option<Subbuffer<[f32]>>,
     pub d_buf_input_pts: Option<Subbuffer<[f32]>>,
     pub d_buf_keys: Option<Subbuffer<[u32]>>,
     pub d_buf_centroids: Option<Subbuffer<[u32]>>,
@@ -151,11 +146,6 @@ impl VoxelGpuContext {
         )
         .context("Failed to create compute pipeline compact")?;
 
-        let descriptor_set_allocator = Arc::new(StandardDescriptorSetAllocator::new(
-            vulkan_context.device.clone(),
-            Default::default(),
-        ));
-
         let pipeline_layout_init = compute_pipeline_init.layout();
         let pipeline_layout_insert = compute_pipeline_insert.layout();
         let pipeline_layout_compact = compute_pipeline_compact.layout();
@@ -184,7 +174,7 @@ impl VoxelGpuContext {
             descriptor_set_layout_init: descriptor_set_layout_init.clone(),
             descriptor_set_layout_insert: descriptor_set_layout_insert.clone(),
             descriptor_set_layout_compact: descriptor_set_layout_compact.clone(),
-            staging_h_buf_input_pts: None,
+            // staging_h_buf_input_pts: None,
             d_buf_input_pts: None,
             d_buf_keys: None,
             d_buf_centroids: None,
@@ -577,27 +567,6 @@ impl VoxelGpuContext {
         const LOCAL_SIZE: u32 = 256;
         let group_count_x = (table_size as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
         let work_group_count = [group_count_x, 1, 1];
-
-        // Check if timestamps are supported
-        let queue_family_props = device
-            .physical_device()
-            .queue_family_properties()
-            .get(queue.queue_family_index() as usize)
-            .context("Failed to get queue family properties")?;
-        let timestamps_supported = queue_family_props
-            .timestamp_valid_bits
-            .map_or(false, |bits| bits > 0);
-
-        let query_pool = if timestamps_supported {
-            let mut create_info = QueryPoolCreateInfo::query_type(QueryType::Timestamp);
-            create_info.query_count = 6;
-            Some(
-                QueryPool::new(device.clone(), create_info)
-                    .context("Failed to create query pool")?,
-            )
-        } else {
-            None
-        };
 
         unsafe {
             command_buffer_builder

@@ -11,7 +11,6 @@ use vulkano::{
         ComputePipeline, Pipeline, PipelineLayout, PipelineShaderStageCreateInfo,
         compute::ComputePipelineCreateInfo, layout::PipelineDescriptorSetLayoutCreateInfo,
     },
-    query::{QueryPool, QueryPoolCreateInfo, QueryType},
     sync::{self, GpuFuture},
 };
 
@@ -232,27 +231,6 @@ impl SearchGpuContext {
         const LOCAL_SIZE: u32 = 256;
         let group_count_x = (downsampled_source_pts_num as u32 + LOCAL_SIZE - 1) / LOCAL_SIZE;
         let work_group_count = [group_count_x, 1, 1];
-
-        // Check if timestamps are supported
-        let queue_family_props = device
-            .physical_device()
-            .queue_family_properties()
-            .get(queue.queue_family_index() as usize)
-            .context("Failed to get queue family properties")?;
-        let timestamps_supported = queue_family_props
-            .timestamp_valid_bits
-            .map_or(false, |bits| bits > 0);
-
-        let query_pool = if timestamps_supported {
-            let mut create_info = QueryPoolCreateInfo::query_type(QueryType::Timestamp);
-            create_info.query_count = 6;
-            Some(
-                QueryPool::new(device.clone(), create_info)
-                    .context("Failed to create query pool")?,
-            )
-        } else {
-            None
-        };
 
         unsafe {
             command_buffer_builder

@@ -1,6 +1,5 @@
 use anyhow::{Context, Result};
 use log::debug;
-use ndarray::Array2;
 
 use crate::{
     gpu_copy::copy_d_to_h,
@@ -8,7 +7,6 @@ use crate::{
     init_gpu::VulkanContext,
     oprate_pcd::{
         PointXYZ, convert_pcd_xyz_to_xyz_color, convert_vecf32_to_pcd_xyz, save_pcd_with_color,
-        save_xyz_pcd,
     },
     registration::GpuContexts,
 };
@@ -19,17 +17,13 @@ pub fn save_results(
     transform_params: &TransformParams,
     source_pcd: &Vec<PointXYZ>,
     target_pcd: &Vec<PointXYZ>,
-    max_iterations: usize,
+    _max_iterations: usize,
     save_path: &str,
 ) -> Result<()> {
     // <!--- Apply the final transformation to the original source point cloud and save the aligned point cloud --->
     gpu_contexts
         .transform_gpu_ctx_source
-        .transform(
-            &gpu_contexts.voxel_gpu_ctx_source,
-            &gpu_contexts.covariance_gpu_ctx_source,
-            *transform_params,
-        )
+        .transform(&gpu_contexts.voxel_gpu_ctx_source, *transform_params)
         .context("Failed to apply final transformation to source points using GPU")?;
 
     let transformed_source_pts = copy_d_to_h(

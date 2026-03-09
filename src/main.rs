@@ -1,25 +1,18 @@
 use core::f32;
-use std::char::MAX;
 
 use anyhow::{Context, Result};
 use log::{debug, info};
-use ndarray::{Array1, Array2, Axis, s};
-use ndarray_linalg::Solve;
 use registration_vulkan::{
     export_logs::{ICPStatResult, save_all_icp_stats},
-    gpu_copy::copy_d_to_h,
     gpu_covariance::CovarianceGpuContext,
-    gpu_icp::{IcpGpuContext, IcpStaticBuffers},
-    gpu_knn_search::{KnnSearchConsts, KnnSearchGpuContext},
-    gpu_normals::{NormalParams, NormalsGpuContext, combine_pts_with_normals},
-    gpu_search_neighbor::{SearchGpuContext, SearchNeighborParams},
+    gpu_icp::IcpGpuContext,
+    gpu_knn_search::KnnSearchGpuContext,
+    gpu_normals::NormalsGpuContext,
+    gpu_search_neighbor::SearchGpuContext,
     gpu_transform::{TransformGpuContext, TransformParams},
     gpu_voxel::VoxelGpuContext,
     init_gpu::VulkanContext,
-    oprate_pcd::{
-        PointXYZ, convert_vecf32_to_pcd_xyz, convert_vecf32_to_pcd_xyz_covs, load_pcd_xyz,
-        load_pcd_xyzrgb, save_pcd, save_pcd_with_covs, save_xyz_pcd,
-    },
+    oprate_pcd::load_pcd_xyz,
     registration::{GpuContexts, calculate_target_center, mat4_mul, registration_icp},
     reverse_pattern::{
         create_fb_flip_matrix, create_lr_flip_matrix, create_original_matrix,
@@ -31,7 +24,6 @@ use registration_vulkan::{
     save_results::save_results,
     transform_data::pcd_to_vecf32,
 };
-use vulkano::instance::debug;
 
 const SOURCE_PCD_PATH: &str = "/workspace/input/vggt-source.pcd";
 // const SOURCE_PCD_PATH: &str = "data/input/H927/lab-room_voxel_025_xyz_only.pcd"; // For test
@@ -40,7 +32,6 @@ const TARGET_PCD_PATH: &str = "/workspace/input/lidar-target.pcd";
 const OUTPUT_DIR: &str = "/workspace/output";
 
 const VOXEL_SIZE: f32 = 0.25;
-const MAX_DIST_SQ: f32 = 10.0;
 const MIN_RMSE: f32 = VOXEL_SIZE * 0.5;
 const MAX_ITERATIONS: usize = 40;
 
