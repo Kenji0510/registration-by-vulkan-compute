@@ -33,7 +33,11 @@ const OUTPUT_DIR: &str = "/workspace/output";
 
 const VOXEL_SIZE: f32 = 0.25;
 const MIN_RMSE: f32 = VOXEL_SIZE * 0.5;
+// <!--- --->
+// If icp registration can't process registration of point cloud well, you might have to change below parameters.
+// You might have to increase below iterations number. (40 to 60)
 const MAX_ITERATIONS: usize = 40;
+// <!--- --->
 
 fn main() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
